@@ -4,12 +4,11 @@ import android.accounts.AccountManager
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Eco
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,10 +16,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.aryama0073.e_brix.R
 import com.aryama0073.e_brix.viewmodel.AuthViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -61,8 +62,6 @@ fun LoginScreen(
                 userPhoto = account.photoUrl?.toString()
             }
         } catch (e: Exception) {
-            // Error 10 (DEVELOPER_ERROR) terjadi saat SHA-1 fingerprint belum terdaftar di Google Cloud Console.
-            // Fallback cerdas: Ambil akun Google yang terdaftar pada perangkat HP secara otomatis.
             try {
                 val accountManager = AccountManager.get(context)
                 val googleAccounts = accountManager.getAccountsByType("com.google")
@@ -100,7 +99,7 @@ fun LoginScreen(
             verticalArrangement = Arrangement.Center
         ) {
 
-            // App Icon / Logo
+            // App Icon / Logo Tebu (Sugarcane)
             Box(
                 modifier = Modifier
                     .size(100.dp)
@@ -109,8 +108,8 @@ fun LoginScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = Icons.Default.Eco,
-                    contentDescription = null,
+                    painter = painterResource(id = R.drawable.ic_sugarcane),
+                    contentDescription = "Logo Tebu",
                     tint = greenColor,
                     modifier = Modifier.size(56.dp)
                 )
@@ -150,7 +149,7 @@ fun LoginScreen(
                 colors = ButtonDefaults.outlinedButtonColors(
                     containerColor = Color.White
                 ),
-                border = ButtonDefaults.outlinedButtonBorder.copy(width = 1.dp)
+                border = BorderStroke(1.dp, Color.LightGray)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
