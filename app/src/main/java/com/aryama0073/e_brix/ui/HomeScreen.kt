@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
@@ -15,25 +16,40 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.aryama0073.e_brix.viewmodel.AuthViewModel
 import com.aryama0073.e_brix.viewmodel.ScanViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     viewModel: ScanViewModel,
+    authViewModel: AuthViewModel,
     onAddClick: () -> Unit,
-    onItemClick: (Int) -> Unit
+    onItemClick: (Int) -> Unit,
+    onLogout: () -> Unit
 ) {
     val dataList by viewModel.dataList.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
+    val currentUser by authViewModel.currentUser.collectAsState()
 
     val greenColor = Color(0xFF059669)
 
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("E-Brix") },
+                title = {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("E-Brix")
+                        currentUser?.displayName?.let { name ->
+                            Text(
+                                text = name,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color.White.copy(alpha = 0.8f)
+                            )
+                        }
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = greenColor,
                     scrolledContainerColor = Color.Unspecified,
@@ -46,6 +62,17 @@ fun HomeScreen(
                         Icon(
                             imageVector = Icons.Default.Refresh,
                             contentDescription = "Refresh",
+                            tint = Color.White
+                        )
+                    }
+                    IconButton(onClick = {
+                        authViewModel.signOut {
+                            onLogout()
+                        }
+                    }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                            contentDescription = "Logout",
                             tint = Color.White
                         )
                     }

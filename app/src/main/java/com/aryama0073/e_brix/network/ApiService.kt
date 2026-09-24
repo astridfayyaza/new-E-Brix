@@ -1,5 +1,6 @@
 package com.aryama0073.e_brix.network
 
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Response
@@ -8,6 +9,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 interface ApiService {
@@ -19,27 +21,49 @@ interface ApiService {
     suspend fun createScan(@Body scanDto: ScanDto): Response<ScanDto>
 
     companion object {
-        // 🔹 KONFIGURASI IP BACKEND 🔹
-        // HP Asli via USB (dengan 'adb reverse tcp:3000 tcp:3000'): "http://127.0.0.1:3000/"
+        // 🔹 IP USB (127.0.0.1:3000) & IP Wi-Fi Komputer (10.66.178.226:3000) 🔹
         const val BASE_URL = "http://127.0.0.1:3000/"
+        const val PC_WIFI_IP = "10.66.178.226:3000"
 
         fun create(baseUrl: String = BASE_URL): ApiService {
             val logging = HttpLoggingInterceptor().apply {
                 level = HttpLoggingInterceptor.Level.BODY
             }
 
-            val client = OkHttpClient.Builder()
-                // Menambahkan header "Connection: close" mencegah bug 'unexpected end of stream' pada Node.js lokal
-                .addInterceptor { chain ->
-                    val request = chain.request().newBuilder()
+            // Automatic Failover Interceptor: Jika USB ADB Reverse terputus, otomatis alihkan ke IP Wi-Fi Komputer
+            val failoverInterceptor = Interceptor { chain ->
+                val request = chain.request()
+                try {
+                    chain.proceed(
+                        request.newBuilder()
+                            .header("Connection", "close")
+                            .build()
+                    )
+                } catch (_: IOException) {
+                    val originalUrl = request.url.toString()
+                    val fallbackUrl = if (originalUrl.contains("127.0.0.1:3000")) {
+                        originalUrl.replace("127.0.0.1:3000", PC_WIFI_IP)
+                    } else if (originalUrl.contains("10.0.2.2:3000")) {
+                        originalUrl.replace("10.0.2.2:3000", PC_WIFI_IP)
+                    } else {
+                        originalUrl
+                    }
+
+                    val fallbackRequest = request.newBuilder()
+                        .url(fallbackUrl)
                         .header("Connection", "close")
                         .build()
-                    chain.proceed(request)
+
+                    chain.proceed(fallbackRequest)
                 }
+            }
+
+            val client = OkHttpClient.Builder()
+                .addInterceptor(failoverInterceptor)
                 .addInterceptor(logging)
-                .connectTimeout(30, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
-                .writeTimeout(30, TimeUnit.SECONDS)
+                .connectTimeout(15, TimeUnit.SECONDS)
+                .readTimeout(15, TimeUnit.SECONDS)
+                .writeTimeout(15, TimeUnit.SECONDS)
                 .retryOnConnectionFailure(true)
                 .build()
 
