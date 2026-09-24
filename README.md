@@ -60,5 +60,3 @@ Dokumentasi detail disusun secara terpisah dalam bentuk bab-bab Markdown pada fo
 - **CORS Middleware**: `cors`
 
 ---
-2. **Cleartext Traffic**: Fitur `android:usesCleartextTraffic="true"` diaktifkan pada `AndroidManifest.xml` untuk mendukung komunikasi HTTP lokal selama proses *development*.
-3. **Optimasi Payload Gambar**: Kompresi gambar disesuaikan pada resolusi JPEG 70% dan dikirim dalam format **Base64** tanpa membebankan *memory/heap* perangkat.
