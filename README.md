@@ -4,6 +4,19 @@
 
 ---
 
+## 📚 Folder Dokumentasi Lengkap (`docs/`)
+
+Dokumentasi detail disusun secara terpisah dalam bentuk bab-bab Markdown pada folder `docs/`:
+1. [Bab 1: Pengenalan & Latar Belakang](docs/01-Overview.md)
+2. [Bab 2: Arsitektur & Alur Kerja Sistem](docs/02-Arsitektur-dan-Alur-Sistem.md)
+3. [Bab 3: Fitur & Komponen Aplikasi Android](docs/03-Fitur-dan-Komponen-Android.md)
+4. [Bab 4: Database PostgreSQL & Backend REST API](docs/04-Database-dan-Backend-API.md)
+5. [Bab 5: Sistem Autentikasi Google & Manajemen Sesi](docs/05-Sistem-Autentikasi-Google.md)
+6. [Bab 6: Panduan Instalasi & Pengujian System](docs/06-Panduan-Instalasi-dan-Pengujian.md)
+7. [Bab 7: Catatan Pengembangan & Rencana Fitur Selanjutnya](docs/07-Catatan-Pengembangan-Selanjutnya.md)
+
+---
+
 ## 📐 Arsitektur Sistem
 
 ```text
