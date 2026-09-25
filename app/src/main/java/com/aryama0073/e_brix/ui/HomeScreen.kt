@@ -7,15 +7,16 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.aryama0073.e_brix.data.ScanData
 import com.aryama0073.e_brix.viewmodel.AuthViewModel
 import com.aryama0073.e_brix.viewmodel.ScanViewModel
 
@@ -25,6 +26,7 @@ fun HomeScreen(
     viewModel: ScanViewModel,
     authViewModel: AuthViewModel,
     onAddClick: () -> Unit,
+    onEditClick: (Int) -> Unit,
     onItemClick: (Int) -> Unit,
     onLogout: () -> Unit
 ) {
@@ -33,7 +35,35 @@ fun HomeScreen(
     val errorMessage by viewModel.errorMessage.collectAsState()
     val currentUser by authViewModel.currentUser.collectAsState()
 
+    var itemToDelete by remember { mutableStateOf<ScanData?>(null) }
+
     val greenColor = Color(0xFF059669)
+
+    // AlertDialog Konfirmasi Hapus Data
+    if (itemToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { itemToDelete = null },
+            title = { Text("Hapus Data") },
+            text = { Text("Apakah Anda yakin ingin menghapus data petak '${itemToDelete?.petak}'?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        itemToDelete?.let { scan ->
+                            viewModel.deleteData(scan.id)
+                        }
+                        itemToDelete = null
+                    }
+                ) {
+                    Text("Hapus", color = Color.Red)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { itemToDelete = null }) {
+                    Text("Batal")
+                }
+            }
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -138,10 +168,35 @@ fun HomeScreen(
                                 .padding(bottom = 8.dp)
                                 .clickable { onItemClick(item.id) }
                         ) {
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                Text("Petak: ${item.petak}", style = MaterialTheme.typography.titleMedium)
-                                Text("Brix: ${item.brix}")
-                                Text("Waktu: ${item.timestamp}", color = Color.Gray)
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text("Petak: ${item.petak}", style = MaterialTheme.typography.titleMedium)
+                                    Text("Brix: ${item.brix}")
+                                    Text("Waktu: ${item.timestamp}", color = Color.Gray, style = MaterialTheme.typography.bodySmall)
+                                }
+
+                                Row {
+                                    IconButton(onClick = { onEditClick(item.id) }) {
+                                        Icon(
+                                            imageVector = Icons.Default.Edit,
+                                            contentDescription = "Edit Data",
+                                            tint = greenColor
+                                        )
+                                    }
+                                    IconButton(onClick = { itemToDelete = item }) {
+                                        Icon(
+                                            imageVector = Icons.Default.Delete,
+                                            contentDescription = "Hapus Data",
+                                            tint = Color.Red
+                                        )
+                                    }
+                                }
                             }
                         }
                     }

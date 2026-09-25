@@ -41,9 +41,8 @@ fun AppNav() {
                 viewModel = viewModel,
                 authViewModel = authViewModel,
                 onAddClick = { navController.navigate("form") },
-                onItemClick = { id ->
-                    navController.navigate("detail/$id")
-                },
+                onEditClick = { id -> navController.navigate("form/edit/$id") },
+                onItemClick = { id -> navController.navigate("detail/$id") },
                 onLogout = {
                     navController.navigate("login") {
                         popUpTo("home") { inclusive = true }
@@ -55,6 +54,17 @@ fun AppNav() {
         composable("form") {
             FormScreen(
                 viewModel = viewModel,
+                editId = null,
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable("form/edit/{id}") { backStack ->
+            val id = backStack.arguments?.getString("id")?.toInt() ?: 0
+
+            FormScreen(
+                viewModel = viewModel,
+                editId = id,
                 onBack = { navController.popBackStack() }
             )
         }
@@ -65,6 +75,7 @@ fun AppNav() {
             DetailScreen(
                 viewModel = viewModel,
                 id = id,
+                onEditClick = { editId -> navController.navigate("form/edit/$editId") },
                 onBack = { navController.popBackStack() }
             )
         }

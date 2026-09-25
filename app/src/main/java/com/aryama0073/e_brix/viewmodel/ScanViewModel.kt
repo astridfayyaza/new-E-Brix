@@ -47,7 +47,7 @@ class ScanViewModel : ViewModel() {
         }
     }
 
-    fun addData(data: ScanData) {
+    fun addData(data: ScanData, onResult: (Boolean) -> Unit = {}) {
         viewModelScope.launch {
             _isLoading.value = true
             _errorMessage.value = null
@@ -56,11 +56,59 @@ class ScanViewModel : ViewModel() {
                 val response = apiService.createScan(dto)
                 if (response.isSuccessful) {
                     fetchScansFromDatabase()
+                    onResult(true)
                 } else {
                     _errorMessage.value = "Gagal menyimpan data (${response.code()})"
+                    onResult(false)
                 }
             } catch (e: Exception) {
                 _errorMessage.value = "Error koneksi: ${e.localizedMessage}"
+                onResult(false)
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun updateData(data: ScanData, onResult: (Boolean) -> Unit = {}) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _errorMessage.value = null
+            try {
+                val dto = data.toDto()
+                val response = apiService.updateScan(data.id, dto)
+                if (response.isSuccessful) {
+                    fetchScansFromDatabase()
+                    onResult(true)
+                } else {
+                    _errorMessage.value = "Gagal memperbarui data (${response.code()})"
+                    onResult(false)
+                }
+            } catch (e: Exception) {
+                _errorMessage.value = "Error koneksi: ${e.localizedMessage}"
+                onResult(false)
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun deleteData(id: Int, onResult: (Boolean) -> Unit = {}) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _errorMessage.value = null
+            try {
+                val response = apiService.deleteScan(id)
+                if (response.isSuccessful) {
+                    fetchScansFromDatabase()
+                    onResult(true)
+                } else {
+                    _errorMessage.value = "Gagal menghapus data (${response.code()})"
+                    onResult(false)
+                }
+            } catch (e: Exception) {
+                _errorMessage.value = "Error koneksi: ${e.localizedMessage}"
+                onResult(false)
             } finally {
                 _isLoading.value = false
             }

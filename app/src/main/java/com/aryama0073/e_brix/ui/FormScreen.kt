@@ -34,6 +34,7 @@ import java.util.*
 @Composable
 fun FormScreen(
     viewModel: ScanViewModel,
+    editId: Int? = null,
     onBack: () -> Unit
 ) {
 
@@ -47,15 +48,29 @@ fun FormScreen(
     val greenColor = Color(0xFF059669)
     val context = LocalContext.current
 
-    // 🔥 VALIDASI FORM
+    // Prefill data jika dalam mode EDIT
+    LaunchedEffect(editId) {
+        if (editId != null && editId != 0) {
+            val existingData = viewModel.getDataById(editId)
+            if (existingData != null) {
+                peta = existingData.petak
+                imageBitmap = existingData.bitmap
+                brix = existingData.brix
+                latitude = existingData.lat
+                longitude = existingData.lon
+                timestamp = existingData.timestamp
+            }
+        }
+    }
+
+    // VALIDASI FORM
     val isFormValid =
         peta.isNotBlank() &&
                 brix.isNotBlank() &&
                 latitude.isNotBlank() &&
-                longitude.isNotBlank() &&
-                imageBitmap != null
+                longitude.isNotBlank()
 
-    // 🔥 CAMERA RESULT
+    // CAMERA RESULT
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -77,7 +92,7 @@ fun FormScreen(
         }
     }
 
-    // 🔥 PERMISSION
+    // PERMISSION
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -92,9 +107,9 @@ fun FormScreen(
             CenterAlignedTopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = greenColor,
-                    titleContentColor = Color.Black
+                    titleContentColor = Color.White
                 ),
-                title = { Text("Tambah Data") }
+                title = { Text(if (editId != null && editId != 0) "Edit Data Scan" else "Tambah Data") }
             )
         }
     ) { padding ->
@@ -160,7 +175,7 @@ fun FormScreen(
                             modifier = Modifier.size(48.dp)
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text("Tambah Gambar", color = Color.Gray)
+                        Text("Tambah / Ambil Gambar", color = Color.Gray)
                     }
                 }
             }
@@ -214,26 +229,46 @@ fun FormScreen(
 
                 Button(
                     onClick = {
-                        val newData = ScanData(
-                            id = (0..100000).random(),
-                            petak = peta,
-                            bitmap = imageBitmap,
-                            brix = brix,
-                            lat = latitude,
-                            lon = longitude,
-                            timestamp = timestamp
-                        )
+                        val currentTimestamp = if (timestamp.isNotBlank()) timestamp else {
+                            val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
+                            sdf.format(Date())
+                        }
 
-                        viewModel.addData(newData)
-                        onBack()
+                        if (editId != null && editId != 0) {
+                            val updatedData = ScanData(
+                                id = editId,
+                                petak = peta,
+                                bitmap = imageBitmap,
+                                brix = brix,
+                                lat = latitude,
+                                lon = longitude,
+                                timestamp = currentTimestamp
+                            )
+                            viewModel.updateData(updatedData) {
+                                onBack()
+                            }
+                        } else {
+                            val newData = ScanData(
+                                id = 0, // Server akan men-generate ID baru
+                                petak = peta,
+                                bitmap = imageBitmap,
+                                brix = brix,
+                                lat = latitude,
+                                lon = longitude,
+                                timestamp = currentTimestamp
+                            )
+                            viewModel.addData(newData) {
+                                onBack()
+                            }
+                        }
                     },
-                    enabled = isFormValid, // 🔥 DISABLE LOGIC
+                    enabled = isFormValid,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = greenColor,
                         disabledContainerColor = Color.LightGray
                     )
                 ) {
-                    Text("Simpan")
+                    Text(if (editId != null && editId != 0) "Simpan Perubahan" else "Simpan")
                 }
             }
         }

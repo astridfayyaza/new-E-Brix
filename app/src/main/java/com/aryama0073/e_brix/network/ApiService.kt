@@ -7,8 +7,11 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
+import retrofit2.http.Path
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
@@ -20,17 +23,22 @@ interface ApiService {
     @POST("api/scans")
     suspend fun createScan(@Body scanDto: ScanDto): Response<ScanDto>
 
+    @PUT("api/scans/{id}")
+    suspend fun updateScan(@Path("id") id: Int, @Body scanDto: ScanDto): Response<ScanDto>
+
+    @DELETE("api/scans/{id}")
+    suspend fun deleteScan(@Path("id") id: Int): Response<Unit>
+
     companion object {
-        // 🔹 IP USB (127.0.0.1:3000) & IP Wi-Fi Komputer (10.66.178.226:3000) 🔹
+        // 🔹 IP USB (127.0.0.1:3000) & IP Wi-Fi Komputer (10.66.178.175:3000) 🔹
         const val BASE_URL = "http://127.0.0.1:3000/"
-        const val PC_WIFI_IP = "10.66.178.226:3000"
+        const val PC_WIFI_IP = "10.66.178.175:3000"
 
         fun create(baseUrl: String = BASE_URL): ApiService {
             val logging = HttpLoggingInterceptor().apply {
                 level = HttpLoggingInterceptor.Level.BODY
             }
 
-            // Automatic Failover Interceptor: Jika USB ADB Reverse terputus, otomatis alihkan ke IP Wi-Fi Komputer
             val failoverInterceptor = Interceptor { chain ->
                 val request = chain.request()
                 try {
