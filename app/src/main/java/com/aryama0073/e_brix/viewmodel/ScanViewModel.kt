@@ -55,6 +55,8 @@ class ScanViewModel : ViewModel() {
                 val dto = data.toDto()
                 val response = apiService.createScan(dto)
                 if (response.isSuccessful) {
+                    val savedItem = response.body()?.toDomain() ?: data
+                    _dataList.value = listOf(savedItem) + _dataList.value.filter { it.id != savedItem.id }
                     fetchScansFromDatabase()
                     onResult(true)
                 } else {
@@ -78,14 +80,18 @@ class ScanViewModel : ViewModel() {
                 val dto = data.toDto()
                 val response = apiService.updateScan(data.id, dto)
                 if (response.isSuccessful) {
+                    val updatedItem = response.body()?.toDomain() ?: data
+                    _dataList.value = _dataList.value.map { if (it.id == data.id) updatedItem else it }
                     fetchScansFromDatabase()
                     onResult(true)
                 } else {
                     _errorMessage.value = "Gagal memperbarui data (${response.code()})"
+                    fetchScansFromDatabase()
                     onResult(false)
                 }
             } catch (e: Exception) {
                 _errorMessage.value = "Error koneksi: ${e.localizedMessage}"
+                fetchScansFromDatabase()
                 onResult(false)
             } finally {
                 _isLoading.value = false
@@ -100,14 +106,17 @@ class ScanViewModel : ViewModel() {
             try {
                 val response = apiService.deleteScan(id)
                 if (response.isSuccessful) {
+                    _dataList.value = _dataList.value.filter { it.id != id }
                     fetchScansFromDatabase()
                     onResult(true)
                 } else {
                     _errorMessage.value = "Gagal menghapus data (${response.code()})"
+                    fetchScansFromDatabase()
                     onResult(false)
                 }
             } catch (e: Exception) {
                 _errorMessage.value = "Error koneksi: ${e.localizedMessage}"
+                fetchScansFromDatabase()
                 onResult(false)
             } finally {
                 _isLoading.value = false

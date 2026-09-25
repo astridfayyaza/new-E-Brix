@@ -22,7 +22,9 @@ fun DetailScreen(
     onEditClick: (Int) -> Unit,
     onBack: () -> Unit
 ) {
-    val data = viewModel.getDataById(id)
+    val dataList by viewModel.dataList.collectAsState()
+    val data = dataList.find { it.id == id }
+
     val greenColor = Color(0xFF059669)
     var showDeleteDialog by remember { mutableStateOf(false) }
 
@@ -34,8 +36,9 @@ fun DetailScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        viewModel.deleteData(data.id) {
-                            showDeleteDialog = false
+                        val deleteId = data.id
+                        showDeleteDialog = false
+                        viewModel.deleteData(deleteId) {
                             onBack()
                         }
                     }

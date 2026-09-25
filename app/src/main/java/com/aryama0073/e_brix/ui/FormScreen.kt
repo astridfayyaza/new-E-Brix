@@ -38,6 +38,8 @@ fun FormScreen(
     onBack: () -> Unit
 ) {
 
+    val dataList by viewModel.dataList.collectAsState()
+
     var peta by remember { mutableStateOf("") }
     var imageBitmap by remember { mutableStateOf<Bitmap?>(null) }
     var brix by remember { mutableStateOf("") }
@@ -48,10 +50,10 @@ fun FormScreen(
     val greenColor = Color(0xFF059669)
     val context = LocalContext.current
 
-    // Prefill data jika dalam mode EDIT
-    LaunchedEffect(editId) {
+    // Prefill data jika dalam mode EDIT secara reaktif
+    LaunchedEffect(editId, dataList) {
         if (editId != null && editId != 0) {
-            val existingData = viewModel.getDataById(editId)
+            val existingData = dataList.find { it.id == editId } ?: viewModel.getDataById(editId)
             if (existingData != null) {
                 peta = existingData.petak
                 imageBitmap = existingData.bitmap
@@ -249,7 +251,7 @@ fun FormScreen(
                             }
                         } else {
                             val newData = ScanData(
-                                id = 0, // Server akan men-generate ID baru
+                                id = 0,
                                 petak = peta,
                                 bitmap = imageBitmap,
                                 brix = brix,
