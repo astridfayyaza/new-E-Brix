@@ -30,9 +30,11 @@ interface ApiService {
     suspend fun deleteScan(@Path("id") id: Int): Response<Unit>
 
     companion object {
-        // 🔹 IP USB (127.0.0.1:3000) & IP Wi-Fi Komputer (10.66.178.175:3000) 🔹
-        const val BASE_URL = "http://127.0.0.1:3000/"
-        const val PC_WIFI_IP = "10.66.178.175:3000"
+        // 🔹 IP Server Backend Flask (Port 5000) 🔹
+        // Primary: IP Wi-Fi PC untuk HP Fisik (10.20.112.225:5000)
+        // Fallback: 10.0.2.2:5000 (untuk Android Emulator) & 127.0.0.1:5000 (untuk USB Reverse)
+        const val BASE_URL = "http://10.20.112.225:5000/"
+        const val EMULATOR_IP = "10.0.2.2:5000"
 
         fun create(baseUrl: String = BASE_URL): ApiService {
             val logging = HttpLoggingInterceptor().apply {
@@ -49,10 +51,10 @@ interface ApiService {
                     )
                 } catch (_: IOException) {
                     val originalUrl = request.url.toString()
-                    val fallbackUrl = if (originalUrl.contains("127.0.0.1:3000")) {
-                        originalUrl.replace("127.0.0.1:3000", PC_WIFI_IP)
-                    } else if (originalUrl.contains("10.0.2.2:3000")) {
-                        originalUrl.replace("10.0.2.2:3000", PC_WIFI_IP)
+                    val fallbackUrl = if (originalUrl.contains("10.20.112.225:5000")) {
+                        originalUrl.replace("10.20.112.225:5000", EMULATOR_IP)
+                    } else if (originalUrl.contains("10.0.2.2:5000")) {
+                        originalUrl.replace("10.0.2.2:5000", "127.0.0.1:5000")
                     } else {
                         originalUrl
                     }
@@ -69,9 +71,9 @@ interface ApiService {
             val client = OkHttpClient.Builder()
                 .addInterceptor(failoverInterceptor)
                 .addInterceptor(logging)
-                .connectTimeout(15, TimeUnit.SECONDS)
-                .readTimeout(15, TimeUnit.SECONDS)
-                .writeTimeout(15, TimeUnit.SECONDS)
+                .connectTimeout(5, TimeUnit.SECONDS)
+                .readTimeout(10, TimeUnit.SECONDS)
+                .writeTimeout(10, TimeUnit.SECONDS)
                 .retryOnConnectionFailure(true)
                 .build()
 
