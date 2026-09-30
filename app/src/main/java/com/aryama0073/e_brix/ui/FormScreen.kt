@@ -13,6 +13,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
@@ -22,6 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.aryama0073.e_brix.data.ScanData
@@ -85,7 +88,7 @@ fun FormScreen(
                 imageBitmap = bitmap
 
                 recognizeText(bitmap) {
-                    brix = it
+                    brix = it.replace("\n", "").replace("\r", "")
 
                     val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault())
                     timestamp = sdf.format(Date())
@@ -126,8 +129,11 @@ fun FormScreen(
             // 🔹 PETAK
             OutlinedTextField(
                 value = peta,
-                onValueChange = { peta = it },
+                onValueChange = { peta = it.replace("\n", "").replace("\r", "") },
                 label = { Text("Petak") },
+                singleLine = true,
+                maxLines = 1,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -187,8 +193,14 @@ fun FormScreen(
             // 🔹 BRIX
             OutlinedTextField(
                 value = brix,
-                onValueChange = { brix = it },
+                onValueChange = { brix = it.replace("\n", "").replace("\r", "") },
                 label = { Text("Brix") },
+                singleLine = true,
+                maxLines = 1,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Next
+                ),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -197,8 +209,14 @@ fun FormScreen(
             // 🔹 LATITUDE
             OutlinedTextField(
                 value = latitude,
-                onValueChange = { latitude = it },
+                onValueChange = { latitude = it.replace("\n", "").replace("\r", "") },
                 label = { Text("Latitude") },
+                singleLine = true,
+                maxLines = 1,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Next
+                ),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -207,8 +225,14 @@ fun FormScreen(
             // 🔹 LONGITUDE
             OutlinedTextField(
                 value = longitude,
-                onValueChange = { longitude = it },
+                onValueChange = { longitude = it.replace("\n", "").replace("\r", "") },
                 label = { Text("Longitude") },
+                singleLine = true,
+                maxLines = 1,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Done
+                ),
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -239,11 +263,11 @@ fun FormScreen(
                         if (editId != null && editId != 0) {
                             val updatedData = ScanData(
                                 id = editId,
-                                petak = peta,
+                                petak = peta.trim(),
                                 bitmap = imageBitmap,
-                                brix = brix,
-                                lat = latitude,
-                                lon = longitude,
+                                brix = brix.trim(),
+                                lat = latitude.trim(),
+                                lon = longitude.trim(),
                                 timestamp = currentTimestamp
                             )
                             viewModel.updateData(updatedData) {
@@ -252,11 +276,11 @@ fun FormScreen(
                         } else {
                             val newData = ScanData(
                                 id = 0,
-                                petak = peta,
+                                petak = peta.trim(),
                                 bitmap = imageBitmap,
-                                brix = brix,
-                                lat = latitude,
-                                lon = longitude,
+                                brix = brix.trim(),
+                                lat = latitude.trim(),
+                                lon = longitude.trim(),
                                 timestamp = currentTimestamp
                             )
                             viewModel.addData(newData) {
