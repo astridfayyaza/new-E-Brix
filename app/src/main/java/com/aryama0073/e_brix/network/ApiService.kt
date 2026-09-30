@@ -30,9 +30,6 @@ interface ApiService {
     suspend fun deleteScan(@Path("id") id: Int): Response<Unit>
 
     companion object {
-        // 🔹 IP Server Backend Flask (Port 5000) 🔹
-        // Primary: IP Wi-Fi PC untuk HP Fisik (10.20.112.225:5000)
-        // Fallback: 10.0.2.2:5000 (untuk Android Emulator) & 127.0.0.1:5000 (untuk USB Reverse)
         const val BASE_URL = "http://10.20.112.225:5000/"
         const val EMULATOR_IP = "10.0.2.2:5000"
 

@@ -1,4 +1,4 @@
-# 🗄️ Bab 4: Database PostgreSQL & Backend REST API
+# 🗄️ Bab 4: Database PostgreSQL & Backend Flask (Python)
 
 ## 🐘 1. Skema Database PostgreSQL
 
@@ -27,29 +27,28 @@ CREATE TABLE IF NOT EXISTS scans (
 
 ---
 
-## 🟢 2. Aplikasi Backend (`server.js`)
+## 🐍 2. Aplikasi Backend Flask (`app.py`)
 
-Backend dibuat menggunakan **Node.js** dan framework **Express.js** dengan driver database `pg` (node-postgres).
+Backend dibuat menggunakan bahasa **Python** dengan framework **Flask** dan driver database `psycopg2-binary`.
 
-### Dependensi Backend:
-- `express`: Framework web server.
-- `pg`: Library PostgreSQL client untuk Node.js.
-- `cors`: Middleware untuk mengizinkan akses koneksi lintas domain/network.
+### Dependensi Python:
+- `flask`: Framework web mikro untuk Python.
+- `flask-cors`: Middleware untuk mengizinkan akses koneksi lintas domain/network (CORS).
+- `psycopg2-binary`: Driver antarmuka PostgreSQL untuk Python.
 
-### Penanganan Payload Gambar Ukuran Besar:
-Karena aplikasi mengirimkan gambar dalam bentuk string Base64, server mengonfigurasi batas ukuran request (*body limit*) sebesar **50MB**:
-
-```javascript
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+Perintah Instalasi Library:
+```bash
+pip install flask flask-cors psycopg2-binary
 ```
 
 ---
 
-## 📑 3. Spesifikasi API Endpoint
+## 📑 3. Spesifikasi API Endpoint (Flask)
 
 | Method | Endpoint | Fungsi | Payload Request | Respon Sukses |
 | :--- | :--- | :--- | :--- | :--- |
-| `GET` | `/` | Test status server | *None* | `200 OK` ("Server E-Brix Backend berjalan...") |
+| `GET` | `/` | Test status server Flask | *None* | `200 OK` ("Server Backend E-Brix (Flask) berjalan...") |
 | `GET` | `/api/scans` | Ambil semua data scan | *None* | `200 OK` (Array JSON berisi daftar objek scan) |
 | `POST` | `/api/scans` | Simpan data scan baru | Objek JSON `ScanDto` | `201 Created` (Objek JSON data yang baru disimpan) |
+| `PUT` | `/api/scans/<id>` | Memperbarui data scan berdasarkan ID | Objek JSON `ScanDto` | `200 OK` (Objek JSON data yang telah diperbarui) |
+| `DELETE` | `/api/scans/<id>` | Hapus data scan berdasarkan ID | *None* | `200 OK` (Pesan sukses hapus) |
