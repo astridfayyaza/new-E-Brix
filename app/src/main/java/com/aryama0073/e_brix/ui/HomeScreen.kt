@@ -1,21 +1,29 @@
 package com.aryama0073.e_brix.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.aryama0073.e_brix.data.ScanData
 import com.aryama0073.e_brix.viewmodel.AuthViewModel
 import com.aryama0073.e_brix.viewmodel.ScanViewModel
@@ -36,10 +44,97 @@ fun HomeScreen(
     val currentUser by authViewModel.currentUser.collectAsState()
 
     var itemToDelete by remember { mutableStateOf<ScanData?>(null) }
+    var showProfileDialog by remember { mutableStateOf(false) }
 
     val greenColor = Color(0xFF059669)
 
-    // AlertDialog Konfirmasi Hapus Data
+    if (showProfileDialog && currentUser != null) {
+        AlertDialog(
+            onDismissRequest = { showProfileDialog = false },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showProfileDialog = false
+                        authViewModel.signOut {
+                            onLogout()
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Logout,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Keluar (Logout)")
+                }
+            },
+            dismissButton = {
+                OutlinedButton(onClick = { showProfileDialog = false }) {
+                    Text("Tutup")
+                }
+            },
+            title = {
+                Text(
+                    text = "Informasi Akun",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp
+                )
+            },
+            text = {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    if (!currentUser?.photoUrl.isNullOrEmpty()) {
+                        AsyncImage(
+                            model = currentUser?.photoUrl,
+                            contentDescription = "Foto Profil",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .size(80.dp)
+                                .clip(CircleShape)
+                        )
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .size(80.dp)
+                                .clip(CircleShape)
+                                .background(greenColor.copy(alpha = 0.2f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.AccountCircle,
+                                contentDescription = null,
+                                tint = greenColor,
+                                modifier = Modifier.size(60.dp)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text(
+                        text = currentUser?.displayName ?: "Pengguna E-Brix",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Text(
+                        text = currentUser?.email ?: "",
+                        color = Color.Gray,
+                        fontSize = 14.sp
+                    )
+                }
+            }
+        )
+    }
+
     if (itemToDelete != null) {
         AlertDialog(
             onDismissRequest = { itemToDelete = null },
@@ -95,16 +190,32 @@ fun HomeScreen(
                             tint = Color.White
                         )
                     }
-                    IconButton(onClick = {
-                        authViewModel.signOut {
-                            onLogout()
+                    IconButton(onClick = { showProfileDialog = true }) {
+                        if (!currentUser?.photoUrl.isNullOrEmpty()) {
+                            AsyncImage(
+                                model = currentUser?.photoUrl,
+                                contentDescription = "Profil User",
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .clip(CircleShape)
+                            )
+                        } else {
+                            Box(
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.White.copy(alpha = 0.3f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.AccountCircle,
+                                    contentDescription = "Profil User",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
                         }
-                    }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-                            contentDescription = "Logout",
-                            tint = Color.White
-                        )
                     }
                 }
             )

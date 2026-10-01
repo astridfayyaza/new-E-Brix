@@ -53,7 +53,6 @@ fun FormScreen(
     val greenColor = Color(0xFF059669)
     val context = LocalContext.current
 
-    // Prefill data jika dalam mode EDIT secara reaktif
     LaunchedEffect(editId, dataList) {
         if (editId != null && editId != 0) {
             val existingData = dataList.find { it.id == editId } ?: viewModel.getDataById(editId)
@@ -68,14 +67,12 @@ fun FormScreen(
         }
     }
 
-    // VALIDASI FORM
     val isFormValid =
         peta.isNotBlank() &&
                 brix.isNotBlank() &&
                 latitude.isNotBlank() &&
                 longitude.isNotBlank()
 
-    // CAMERA RESULT
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -97,7 +94,6 @@ fun FormScreen(
         }
     }
 
-    // PERMISSION
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -126,7 +122,6 @@ fun FormScreen(
                 .fillMaxSize()
         ) {
 
-            // 🔹 PETAK
             OutlinedTextField(
                 value = peta,
                 onValueChange = { peta = it.replace("\n", "").replace("\r", "") },
@@ -139,7 +134,6 @@ fun FormScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 🔹 FOTO
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -190,7 +184,6 @@ fun FormScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // 🔹 BRIX
             OutlinedTextField(
                 value = brix,
                 onValueChange = { brix = it.replace("\n", "").replace("\r", "") },
@@ -206,7 +199,6 @@ fun FormScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // 🔹 LATITUDE
             OutlinedTextField(
                 value = latitude,
                 onValueChange = { latitude = it.replace("\n", "").replace("\r", "") },
@@ -222,7 +214,6 @@ fun FormScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // 🔹 LONGITUDE
             OutlinedTextField(
                 value = longitude,
                 onValueChange = { longitude = it.replace("\n", "").replace("\r", "") },
@@ -238,7 +229,6 @@ fun FormScreen(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // 🔹 BUTTON
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween

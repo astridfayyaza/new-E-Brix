@@ -35,7 +35,6 @@ fun LoginScreen(
     val context = LocalContext.current
     val greenColor = Color(0xFF059669)
 
-    // Setup Google Sign In Options
     val gso = remember {
         GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestEmail()
@@ -73,7 +72,6 @@ fun LoginScreen(
             }
         }
 
-        // Jika tidak ada email dari intent/Google API, gunakan default user akun
         val finalEmail = userEmail ?: "user.ebrix@gmail.com"
         val finalName = userName ?: finalEmail.substringBefore("@").replaceFirstChar { it.uppercase() }
 
@@ -99,7 +97,6 @@ fun LoginScreen(
             verticalArrangement = Arrangement.Center
         ) {
 
-            // App Icon / Logo Tebu (Sugarcane)
             Box(
                 modifier = Modifier
                     .size(100.dp)
@@ -136,7 +133,6 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(48.dp))
 
-            // Google Sign-In Button
             OutlinedButton(
                 onClick = {
                     val signInIntent = googleSignInClient.signInIntent
