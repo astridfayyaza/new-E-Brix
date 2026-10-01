@@ -49,40 +49,36 @@ fun LoginScreen(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
         val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-        var userEmail: String? = null
-        var userName: String? = null
-        var userPhoto: String? = null
 
         try {
             val account = task.getResult(ApiException::class.java)
             if (account != null) {
-                userEmail = account.email
-                userName = account.displayName ?: account.givenName
-                userPhoto = account.photoUrl?.toString()
+                val userEmail = account.email ?: ""
+                val userName = account.displayName ?: account.givenName ?: userEmail.substringBefore("@")
+                val userPhoto = account.photoUrl?.toString()
+
+                authViewModel.onSignInSuccess(
+                    email = userEmail,
+                    displayName = userName,
+                    photoUrl = userPhoto
+                )
+
+                Toast.makeText(context, "Selamat datang, $userName!", Toast.LENGTH_SHORT).show()
+                onLoginSuccess()
             }
+        } catch (e: ApiException) {
+            Toast.makeText(
+                context,
+                "Gagal Google Sign-In (Error Code: ${e.statusCode})",
+                Toast.LENGTH_LONG
+            ).show()
         } catch (e: Exception) {
-            try {
-                val accountManager = AccountManager.get(context)
-                val googleAccounts = accountManager.getAccountsByType("com.google")
-                if (googleAccounts.isNotEmpty()) {
-                    userEmail = googleAccounts[0].name
-                    userName = userEmail.substringBefore("@").replaceFirstChar { it.uppercase() }
-                }
-            } catch (ignored: Exception) {
-            }
+            Toast.makeText(
+                context,
+                "Gagal Login: ${e.localizedMessage}",
+                Toast.LENGTH_LONG
+            ).show()
         }
-
-        val finalEmail = userEmail ?: "user.ebrix@gmail.com"
-        val finalName = userName ?: finalEmail.substringBefore("@").replaceFirstChar { it.uppercase() }
-
-        authViewModel.onSignInSuccess(
-            email = finalEmail,
-            displayName = finalName,
-            photoUrl = userPhoto
-        )
-
-        Toast.makeText(context, "Selamat datang, $finalName!", Toast.LENGTH_SHORT).show()
-        onLoginSuccess()
     }
 
     Surface(
