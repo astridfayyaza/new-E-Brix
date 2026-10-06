@@ -12,6 +12,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -40,10 +42,24 @@ fun FormScreen(
     editId: Int? = null,
     onBack: () -> Unit
 ) {
-
     val dataList by viewModel.dataList.collectAsState()
 
+    val jenisTebuOptions = remember {
+        listOf(
+            "Bululawang (BL)",
+            "PS 862",
+            "PS 881",
+            "PSJK 922",
+            "Kidang Kencana (KK)",
+            "VMC 76-16",
+            "M 442-51",
+            "Lainnya"
+        )
+    }
+
     var peta by remember { mutableStateOf("") }
+    var jenisTebu by remember { mutableStateOf(jenisTebuOptions[0]) }
+    var expandedJenisTebu by remember { mutableStateOf(false) }
     var imageBitmap by remember { mutableStateOf<Bitmap?>(null) }
     var brix by remember { mutableStateOf("") }
     var latitude by remember { mutableStateOf("") }
@@ -52,12 +68,16 @@ fun FormScreen(
 
     val greenColor = Color(0xFF059669)
     val context = LocalContext.current
+    val scrollState = rememberScrollState()
 
     LaunchedEffect(editId, dataList) {
         if (editId != null && editId != 0) {
             val existingData = dataList.find { it.id == editId } ?: viewModel.getDataById(editId)
             if (existingData != null) {
                 peta = existingData.petak
+                if (existingData.jenisTebu.isNotBlank()) {
+                    jenisTebu = existingData.jenisTebu
+                }
                 imageBitmap = existingData.bitmap
                 brix = existingData.brix
                 latitude = existingData.lat
@@ -69,6 +89,7 @@ fun FormScreen(
 
     val isFormValid =
         peta.isNotBlank() &&
+                jenisTebu.isNotBlank() &&
                 brix.isNotBlank() &&
                 latitude.isNotBlank() &&
                 longitude.isNotBlank()
@@ -76,11 +97,8 @@ fun FormScreen(
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
-
         if (result.resultCode == Activity.RESULT_OK) {
-
             val bitmap = result.data?.extras?.get("data") as? Bitmap
-
             if (bitmap != null) {
                 imageBitmap = bitmap
 
@@ -120,6 +138,7 @@ fun FormScreen(
                 .padding(padding)
                 .padding(16.dp)
                 .fillMaxSize()
+                .verticalScroll(scrollState)
         ) {
 
             OutlinedTextField(
@@ -131,6 +150,41 @@ fun FormScreen(
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 modifier = Modifier.fillMaxWidth()
             )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            ExposedDropdownMenuBox(
+                expanded = expandedJenisTebu,
+                onExpandedChange = { expandedJenisTebu = !expandedJenisTebu },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                OutlinedTextField(
+                    value = jenisTebu,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Jenis Tebu") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedJenisTebu) },
+                    colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+                    modifier = Modifier
+                        .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                        .fillMaxWidth()
+                )
+
+                ExposedDropdownMenu(
+                    expanded = expandedJenisTebu,
+                    onDismissRequest = { expandedJenisTebu = false }
+                ) {
+                    jenisTebuOptions.forEach { option ->
+                        DropdownMenuItem(
+                            text = { Text(option) },
+                            onClick = {
+                                jenisTebu = option
+                                expandedJenisTebu = false
+                            }
+                        )
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -144,7 +198,6 @@ fun FormScreen(
                                 context,
                                 Manifest.permission.CAMERA
                             ) == PackageManager.PERMISSION_GRANTED -> {
-
                                 val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
                                 cameraLauncher.launch(intent)
                             }
@@ -161,7 +214,6 @@ fun FormScreen(
                     ),
                 contentAlignment = Alignment.Center
             ) {
-
                 if (imageBitmap != null) {
                     Image(
                         bitmap = imageBitmap!!.asImageBitmap(),
@@ -227,13 +279,12 @@ fun FormScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(24.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-
                 OutlinedButton(
                     onClick = onBack,
                     colors = ButtonDefaults.outlinedButtonColors(
@@ -254,6 +305,7 @@ fun FormScreen(
                             val updatedData = ScanData(
                                 id = editId,
                                 petak = peta.trim(),
+                                jenisTebu = jenisTebu.trim(),
                                 bitmap = imageBitmap,
                                 brix = brix.trim(),
                                 lat = latitude.trim(),
@@ -267,6 +319,7 @@ fun FormScreen(
                             val newData = ScanData(
                                 id = 0,
                                 petak = peta.trim(),
+                                jenisTebu = jenisTebu.trim(),
                                 bitmap = imageBitmap,
                                 brix = brix.trim(),
                                 lat = latitude.trim(),

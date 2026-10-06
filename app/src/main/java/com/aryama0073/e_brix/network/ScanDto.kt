@@ -17,6 +17,8 @@ data class ScanDto(
     @SerializedName("id") val id: Int? = null,
     @SerializedName("id_blok") val idBlok: String? = null,
     @SerializedName("petak") val petakRaw: String? = null,
+    @SerializedName("jenis_tebu") val jenisTebuRaw: String? = null,
+    @SerializedName("varietas") val varietasRaw: String? = null,
     @SerializedName("foto") val foto: String? = null,
     @SerializedName("image_base64") val imageBase64: String? = null,
     @SerializedName("nilai_brix") val nilaiBrix: Double? = null,
@@ -28,6 +30,7 @@ data class ScanDto(
     @SerializedName("timestamp") val timestampRaw: String? = null
 ) {
     val petak: String get() = petakRaw ?: idBlok ?: "Blok A"
+    val jenisTebu: String get() = jenisTebuRaw ?: varietasRaw ?: "Bululawang (BL)"
     val brix: String get() = nilaiBrix?.toString() ?: brixRaw ?: "0"
     val lat: String get() = latitude?.toString() ?: latRaw ?: "0"
     val lon: String get() = longitude?.toString() ?: lonRaw ?: "0"
@@ -54,6 +57,7 @@ fun ScanDto.toDomain(): ScanData {
     return ScanData(
         id = parsedId,
         petak = petak,
+        jenisTebu = jenisTebu,
         bitmap = bitmap,
         brix = brix,
         lat = lat,
@@ -77,6 +81,7 @@ fun ScanData.toDto(): ScanDto {
     return ScanDto(
         id = if (id != 0) id else null,
         petakRaw = petak,
+        jenisTebuRaw = jenisTebu,
         imageBase64 = base64String,
         nilaiBrix = brix.toDoubleOrNull(),
         brixRaw = brix,

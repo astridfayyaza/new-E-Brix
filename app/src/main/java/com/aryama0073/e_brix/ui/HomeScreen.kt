@@ -11,7 +11,7 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -62,7 +62,7 @@ fun HomeScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Logout,
+                        imageVector = Icons.AutoMirrored.Filled.Logout,
                         contentDescription = null,
                         modifier = Modifier.size(18.dp)
                     )
@@ -288,6 +288,7 @@ fun HomeScreen(
                             ) {
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text("Petak: ${item.petak}", style = MaterialTheme.typography.titleMedium)
+                                    Text("Jenis Tebu: ${item.jenisTebu}", style = MaterialTheme.typography.bodyMedium, color = greenColor)
                                     Text("Brix: ${item.brix}")
                                     Text("Waktu: ${item.timestamp}", color = Color.Gray, style = MaterialTheme.typography.bodySmall)
                                 }

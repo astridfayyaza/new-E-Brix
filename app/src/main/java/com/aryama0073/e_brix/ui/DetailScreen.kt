@@ -105,6 +105,8 @@ fun DetailScreen(
             ) {
 
                 Text("Petak: ${data.petak}", style = MaterialTheme.typography.titleLarge)
+                Spacer(modifier = Modifier.height(4.dp))
+                Text("Jenis Tebu: ${data.jenisTebu}", style = MaterialTheme.typography.titleMedium, color = greenColor)
 
                 Spacer(modifier = Modifier.height(12.dp))
 
