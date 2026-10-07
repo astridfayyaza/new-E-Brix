@@ -1,21 +1,17 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
-    id("com.google.gms.google-services")
+    // id("com.google.gms.google-services") // Dinonaktifkan karena tidak menggunakan google-services.json Firebase
 }
 
 android {
     namespace = "com.aryama0073.e_brix"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
+    compileSdk = 35 // atau gunakan release(36) bawaan Anda
 
     defaultConfig {
         applicationId = "com.aryama0073.e_brix"
         minSdk = 24
-        targetSdk = 36
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 

@@ -30,7 +30,8 @@ interface ApiService {
     suspend fun deleteScan(@Path("id") id: Int): Response<Unit>
 
     companion object {
-        const val BASE_URL = "http://10.20.112.60:5000/"
+        // IP Wi-Fi Laptop Anda saat ini: 10.20.112.162
+        const val BASE_URL = "http://10.20.112.162:5000/"
         const val EMULATOR_IP = "10.0.2.2:5000"
 
         fun create(baseUrl: String = BASE_URL): ApiService {
@@ -48,8 +49,8 @@ interface ApiService {
                     )
                 } catch (_: IOException) {
                     val originalUrl = request.url.toString()
-                    val fallbackUrl = if (originalUrl.contains("10.20.112.60:5000")) {
-                        originalUrl.replace("10.20.112.60:5000", EMULATOR_IP)
+                    val fallbackUrl = if (originalUrl.contains("10.20.112.162:5000")) {
+                        originalUrl.replace("10.20.112.162:5000", EMULATOR_IP)
                     } else if (originalUrl.contains("10.0.2.2:5000")) {
                         originalUrl.replace("10.0.2.2:5000", "127.0.0.1:5000")
                     } else {
