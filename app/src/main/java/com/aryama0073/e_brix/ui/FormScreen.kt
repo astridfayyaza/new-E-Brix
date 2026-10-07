@@ -9,27 +9,42 @@ import android.graphics.Bitmap
 import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Eco
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import com.aryama0073.e_brix.data.ScanData
 import com.aryama0073.e_brix.ocr.recognizeText
@@ -148,9 +163,24 @@ fun FormScreen(
             CenterAlignedTopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = greenColor,
-                    titleContentColor = Color.White
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White
                 ),
-                title = { Text(if (editId != null && editId != 0) "Edit Data Scan" else "Tambah Data") }
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Kembali"
+                        )
+                    }
+                },
+                title = {
+                    Text(
+                        text = if (editId != null && editId != 0) "Edit Data Scan" else "Tambah Data Scan",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 19.sp
+                    )
+                }
             )
         }
     ) { padding ->
@@ -159,6 +189,7 @@ fun FormScreen(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
+                .background(Color(0xFFF8FAFC))
         ) {
             val isWideScreen = maxWidth >= 600.dp || isLandscape
 
@@ -166,58 +197,354 @@ fun FormScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(16.dp)
-                    .verticalScroll(scrollState)
+                    .verticalScroll(scrollState),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+
                 if (isWideScreen) {
-                    // Responsive Wide Layout (Tablet / Landscape): 2 Columns side-by-side
+                    // Responsive Wide Layout (Tablet / Landscape): 2 Columns
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        // Left Column: Camera Box Image
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(280.dp)
-                                .clickable { onCameraClick() }
-                                .border(
-                                    width = 1.dp,
-                                    color = Color.Gray,
-                                    shape = RoundedCornerShape(12.dp)
-                                ),
-                            contentAlignment = Alignment.Center
+                        // Left Column: Camera Box Card
+                        ElevatedCard(
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(20.dp),
+                            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
+                            colors = CardDefaults.elevatedCardColors(containerColor = Color.White)
                         ) {
-                            if (imageBitmap != null) {
-                                Image(
-                                    bitmap = imageBitmap!!.asImageBitmap(),
-                                    contentDescription = null,
-                                    modifier = Modifier.fillMaxSize()
-                                )
-                            } else {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Column(
+                                modifier = Modifier.padding(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
                                     Icon(
-                                        imageVector = Icons.Default.Add,
+                                        imageVector = Icons.Default.CameraAlt,
                                         contentDescription = null,
-                                        tint = Color.Gray,
-                                        modifier = Modifier.size(48.dp)
+                                        tint = greenColor,
+                                        modifier = Modifier.size(20.dp)
                                     )
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    Text("Tambah / Ambil Gambar", color = Color.Gray)
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = "Foto Sampel & OCR",
+                                        fontWeight = FontWeight.SemiBold,
+                                        fontSize = 15.sp,
+                                        color = greenColor
+                                    )
+                                }
+
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(280.dp)
+                                        .clip(RoundedCornerShape(16.dp))
+                                        .background(greenColor.copy(alpha = 0.05f))
+                                        .border(
+                                            width = 1.5.dp,
+                                            color = if (imageBitmap != null) greenColor else Color.LightGray,
+                                            shape = RoundedCornerShape(16.dp)
+                                        )
+                                        .clickable { onCameraClick() },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    if (imageBitmap != null) {
+                                        Image(
+                                            bitmap = imageBitmap!!.asImageBitmap(),
+                                            contentDescription = "Hasil Foto",
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier.fillMaxSize()
+                                        )
+                                        Box(
+                                            modifier = Modifier
+                                                .align(Alignment.BottomEnd)
+                                                .padding(12.dp)
+                                                .clip(CircleShape)
+                                                .background(Color.Black.copy(alpha = 0.6f))
+                                                .padding(8.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.CameraAlt,
+                                                contentDescription = "Ganti Foto",
+                                                tint = Color.White,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                        }
+                                    } else {
+                                        Column(
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            verticalArrangement = Arrangement.Center
+                                        ) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(56.dp)
+                                                    .clip(CircleShape)
+                                                    .background(greenColor.copy(alpha = 0.12f)),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Add,
+                                                    contentDescription = null,
+                                                    tint = greenColor,
+                                                    modifier = Modifier.size(32.dp)
+                                                )
+                                            }
+                                            Spacer(modifier = Modifier.height(10.dp))
+                                            Text(
+                                                text = "Ambil Foto Refraktometer",
+                                                fontSize = 14.sp,
+                                                fontWeight = FontWeight.Medium,
+                                                color = Color.DarkGray
+                                            )
+                                            Text(
+                                                text = "Otomatis membaca nilai Brix dari foto",
+                                                fontSize = 12.sp,
+                                                color = Color.Gray
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
 
-                        // Right Column: Form Fields
+                        // Right Column: Input Cards
                         Column(
                             modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
+                            // Section 1: Lahan & Varietas
+                            ElevatedCard(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(20.dp),
+                                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
+                                colors = CardDefaults.elevatedCardColors(containerColor = Color.White)
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(16.dp),
+                                    verticalArrangement = Arrangement.spacedBy(14.dp)
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            imageVector = Icons.Default.Map,
+                                            contentDescription = null,
+                                            tint = greenColor,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            text = "Informasi Lahan & Varietas",
+                                            fontWeight = FontWeight.SemiBold,
+                                            fontSize = 15.sp,
+                                            color = greenColor
+                                        )
+                                    }
+
+                                    OutlinedTextField(
+                                        value = peta,
+                                        onValueChange = { peta = it.replace("\n", "").replace("\r", "") },
+                                        label = { Text("Petak / Blok Lahan") },
+                                        leadingIcon = {
+                                            Icon(
+                                                imageVector = Icons.Default.Map,
+                                                contentDescription = null,
+                                                tint = Color.Gray
+                                            )
+                                        },
+                                        singleLine = true,
+                                        maxLines = 1,
+                                        shape = RoundedCornerShape(14.dp),
+                                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+
+                                    ExposedDropdownMenuBox(
+                                        expanded = expandedJenisTebu,
+                                        onExpandedChange = { expandedJenisTebu = !expandedJenisTebu },
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        OutlinedTextField(
+                                            value = jenisTebu,
+                                            onValueChange = {},
+                                            readOnly = true,
+                                            label = { Text("Jenis Tebu (Varietas)") },
+                                            leadingIcon = {
+                                                Icon(
+                                                    imageVector = Icons.Default.Eco,
+                                                    contentDescription = null,
+                                                    tint = greenColor
+                                                )
+                                            },
+                                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedJenisTebu) },
+                                            shape = RoundedCornerShape(14.dp),
+                                            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+                                            modifier = Modifier
+                                                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                                                .fillMaxWidth()
+                                        )
+
+                                        ExposedDropdownMenu(
+                                            expanded = expandedJenisTebu,
+                                            onDismissRequest = { expandedJenisTebu = false }
+                                        ) {
+                                            jenisTebuOptions.forEach { option ->
+                                                DropdownMenuItem(
+                                                    text = {
+                                                        Text(
+                                                            text = option,
+                                                            fontWeight = if (option == jenisTebu) FontWeight.Bold else FontWeight.Normal
+                                                        )
+                                                    },
+                                                    onClick = {
+                                                        jenisTebu = option
+                                                        expandedJenisTebu = false
+                                                    }
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Section 2: Brix & GPS
+                            ElevatedCard(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(20.dp),
+                                elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
+                                colors = CardDefaults.elevatedCardColors(containerColor = Color.White)
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(16.dp),
+                                    verticalArrangement = Arrangement.spacedBy(14.dp)
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            imageVector = Icons.Default.Speed,
+                                            contentDescription = null,
+                                            tint = greenColor,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            text = "Hasil Pengukuran & Lokasi",
+                                            fontWeight = FontWeight.SemiBold,
+                                            fontSize = 15.sp,
+                                            color = greenColor
+                                        )
+                                    }
+
+                                    OutlinedTextField(
+                                        value = brix,
+                                        onValueChange = { brix = it.replace("\n", "").replace("\r", "") },
+                                        label = { Text("Nilai Brix (%)") },
+                                        leadingIcon = {
+                                            Icon(
+                                                imageVector = Icons.Default.Speed,
+                                                contentDescription = null,
+                                                tint = greenColor
+                                            )
+                                        },
+                                        singleLine = true,
+                                        maxLines = 1,
+                                        shape = RoundedCornerShape(14.dp),
+                                        keyboardOptions = KeyboardOptions(
+                                            keyboardType = KeyboardType.Number,
+                                            imeAction = ImeAction.Next
+                                        ),
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                    ) {
+                                        OutlinedTextField(
+                                            value = latitude,
+                                            onValueChange = { latitude = it.replace("\n", "").replace("\r", "") },
+                                            label = { Text("Latitude") },
+                                            leadingIcon = {
+                                                Icon(
+                                                    imageVector = Icons.Default.LocationOn,
+                                                    contentDescription = null,
+                                                    tint = Color.Gray
+                                                )
+                                            },
+                                            singleLine = true,
+                                            maxLines = 1,
+                                            shape = RoundedCornerShape(14.dp),
+                                            keyboardOptions = KeyboardOptions(
+                                                keyboardType = KeyboardType.Number,
+                                                imeAction = ImeAction.Next
+                                            ),
+                                            modifier = Modifier.weight(1f)
+                                        )
+
+                                        OutlinedTextField(
+                                            value = longitude,
+                                            onValueChange = { longitude = it.replace("\n", "").replace("\r", "") },
+                                            label = { Text("Longitude") },
+                                            leadingIcon = {
+                                                Icon(
+                                                    imageVector = Icons.Default.LocationOn,
+                                                    contentDescription = null,
+                                                    tint = Color.Gray
+                                                )
+                                            },
+                                            singleLine = true,
+                                            maxLines = 1,
+                                            shape = RoundedCornerShape(14.dp),
+                                            keyboardOptions = KeyboardOptions(
+                                                keyboardType = KeyboardType.Number,
+                                                imeAction = ImeAction.Done
+                                            ),
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    // Smartphone Layout (Portrait): Card Sections
+                    ElevatedCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(20.dp),
+                        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
+                        colors = CardDefaults.elevatedCardColors(containerColor = Color.White)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(14.dp)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.Map,
+                                    contentDescription = null,
+                                    tint = greenColor,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Informasi Lahan & Varietas",
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 15.sp,
+                                    color = greenColor
+                                )
+                            }
+
                             OutlinedTextField(
                                 value = peta,
                                 onValueChange = { peta = it.replace("\n", "").replace("\r", "") },
-                                label = { Text("Petak") },
+                                label = { Text("Petak / Blok Lahan") },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.Map,
+                                        contentDescription = null,
+                                        tint = Color.Gray
+                                    )
+                                },
                                 singleLine = true,
                                 maxLines = 1,
+                                shape = RoundedCornerShape(14.dp),
                                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                                 modifier = Modifier.fillMaxWidth()
                             )
@@ -231,8 +558,16 @@ fun FormScreen(
                                     value = jenisTebu,
                                     onValueChange = {},
                                     readOnly = true,
-                                    label = { Text("Jenis Tebu") },
+                                    label = { Text("Jenis Tebu (Varietas)") },
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = Icons.Default.Eco,
+                                            contentDescription = null,
+                                            tint = greenColor
+                                        )
+                                    },
                                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedJenisTebu) },
+                                    shape = RoundedCornerShape(14.dp),
                                     colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
                                     modifier = Modifier
                                         .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
@@ -245,7 +580,12 @@ fun FormScreen(
                                 ) {
                                     jenisTebuOptions.forEach { option ->
                                         DropdownMenuItem(
-                                            text = { Text(option) },
+                                            text = {
+                                                Text(
+                                                    text = option,
+                                                    fontWeight = if (option == jenisTebu) FontWeight.Bold else FontWeight.Normal
+                                                )
+                                            },
                                             onClick = {
                                                 jenisTebu = option
                                                 expandedJenisTebu = false
@@ -254,13 +594,148 @@ fun FormScreen(
                                     }
                                 }
                             }
+                        }
+                    }
+
+                    ElevatedCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(20.dp),
+                        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
+                        colors = CardDefaults.elevatedCardColors(containerColor = Color.White)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.CameraAlt,
+                                    contentDescription = null,
+                                    tint = greenColor,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Foto Sampel & OCR",
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 15.sp,
+                                    color = greenColor
+                                )
+                            }
+
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(210.dp)
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(greenColor.copy(alpha = 0.05f))
+                                    .border(
+                                        width = 1.5.dp,
+                                        color = if (imageBitmap != null) greenColor else Color.LightGray,
+                                        shape = RoundedCornerShape(16.dp)
+                                    )
+                                    .clickable { onCameraClick() },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (imageBitmap != null) {
+                                    Image(
+                                        bitmap = imageBitmap!!.asImageBitmap(),
+                                        contentDescription = "Hasil Foto",
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                    Box(
+                                        modifier = Modifier
+                                            .align(Alignment.BottomEnd)
+                                            .padding(12.dp)
+                                            .clip(CircleShape)
+                                            .background(Color.Black.copy(alpha = 0.6f))
+                                            .padding(8.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.CameraAlt,
+                                            contentDescription = "Ganti Foto",
+                                            tint = Color.White,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
+                                } else {
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.Center
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(56.dp)
+                                                .clip(CircleShape)
+                                                .background(greenColor.copy(alpha = 0.12f)),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Add,
+                                                contentDescription = null,
+                                                tint = greenColor,
+                                                modifier = Modifier.size(32.dp)
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.height(10.dp))
+                                        Text(
+                                            text = "Ambil Foto Refraktometer",
+                                            fontSize = 14.sp,
+                                            fontWeight = FontWeight.Medium,
+                                            color = Color.DarkGray
+                                        )
+                                        Text(
+                                            text = "Otomatis membaca nilai Brix dari foto",
+                                            fontSize = 12.sp,
+                                            color = Color.Gray
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    ElevatedCard(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(20.dp),
+                        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
+                        colors = CardDefaults.elevatedCardColors(containerColor = Color.White)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(14.dp)
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.Speed,
+                                    contentDescription = null,
+                                    tint = greenColor,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Hasil Pengukuran & Lokasi",
+                                    fontWeight = FontWeight.SemiBold,
+                                    fontSize = 15.sp,
+                                    color = greenColor
+                                )
+                            }
 
                             OutlinedTextField(
                                 value = brix,
                                 onValueChange = { brix = it.replace("\n", "").replace("\r", "") },
-                                label = { Text("Brix") },
+                                label = { Text("Nilai Brix (%)") },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.Speed,
+                                        contentDescription = null,
+                                        tint = greenColor
+                                    )
+                                },
                                 singleLine = true,
                                 maxLines = 1,
+                                shape = RoundedCornerShape(14.dp),
                                 keyboardOptions = KeyboardOptions(
                                     keyboardType = KeyboardType.Number,
                                     imeAction = ImeAction.Next
@@ -270,14 +745,22 @@ fun FormScreen(
 
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
                                 OutlinedTextField(
                                     value = latitude,
                                     onValueChange = { latitude = it.replace("\n", "").replace("\r", "") },
                                     label = { Text("Latitude") },
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = Icons.Default.LocationOn,
+                                            contentDescription = null,
+                                            tint = Color.Gray
+                                        )
+                                    },
                                     singleLine = true,
                                     maxLines = 1,
+                                    shape = RoundedCornerShape(14.dp),
                                     keyboardOptions = KeyboardOptions(
                                         keyboardType = KeyboardType.Number,
                                         imeAction = ImeAction.Next
@@ -289,8 +772,16 @@ fun FormScreen(
                                     value = longitude,
                                     onValueChange = { longitude = it.replace("\n", "").replace("\r", "") },
                                     label = { Text("Longitude") },
+                                    leadingIcon = {
+                                        Icon(
+                                            imageVector = Icons.Default.LocationOn,
+                                            contentDescription = null,
+                                            tint = Color.Gray
+                                        )
+                                    },
                                     singleLine = true,
                                     maxLines = 1,
+                                    shape = RoundedCornerShape(14.dp),
                                     keyboardOptions = KeyboardOptions(
                                         keyboardType = KeyboardType.Number,
                                         imeAction = ImeAction.Done
@@ -300,141 +791,33 @@ fun FormScreen(
                             }
                         }
                     }
-                } else {
-                    // Responsive Smartphone Layout (Portrait): Single Column
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        OutlinedTextField(
-                            value = peta,
-                            onValueChange = { peta = it.replace("\n", "").replace("\r", "") },
-                            label = { Text("Petak") },
-                            singleLine = true,
-                            maxLines = 1,
-                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                            modifier = Modifier.fillMaxWidth()
-                        )
-
-                        ExposedDropdownMenuBox(
-                            expanded = expandedJenisTebu,
-                            onExpandedChange = { expandedJenisTebu = !expandedJenisTebu },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            OutlinedTextField(
-                                value = jenisTebu,
-                                onValueChange = {},
-                                readOnly = true,
-                                label = { Text("Jenis Tebu") },
-                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedJenisTebu) },
-                                colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-                                modifier = Modifier
-                                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-                                    .fillMaxWidth()
-                            )
-
-                            ExposedDropdownMenu(
-                                expanded = expandedJenisTebu,
-                                onDismissRequest = { expandedJenisTebu = false }
-                            ) {
-                                jenisTebuOptions.forEach { option ->
-                                    DropdownMenuItem(
-                                        text = { Text(option) },
-                                        onClick = {
-                                            jenisTebu = option
-                                            expandedJenisTebu = false
-                                        }
-                                    )
-                                }
-                            }
-                        }
-
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(200.dp)
-                                .clickable { onCameraClick() }
-                                .border(
-                                    width = 1.dp,
-                                    color = Color.Gray,
-                                    shape = RoundedCornerShape(12.dp)
-                                ),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            if (imageBitmap != null) {
-                                Image(
-                                    bitmap = imageBitmap!!.asImageBitmap(),
-                                    contentDescription = null,
-                                    modifier = Modifier.fillMaxSize()
-                                )
-                            } else {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Icon(
-                                        imageVector = Icons.Default.Add,
-                                        contentDescription = null,
-                                        tint = Color.Gray,
-                                        modifier = Modifier.size(48.dp)
-                                    )
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                    Text("Tambah / Ambil Gambar", color = Color.Gray)
-                                }
-                            }
-                        }
-
-                        OutlinedTextField(
-                            value = brix,
-                            onValueChange = { brix = it.replace("\n", "").replace("\r", "") },
-                            label = { Text("Brix") },
-                            singleLine = true,
-                            maxLines = 1,
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Number,
-                                imeAction = ImeAction.Next
-                            ),
-                            modifier = Modifier.fillMaxWidth()
-                        )
-
-                        OutlinedTextField(
-                            value = latitude,
-                            onValueChange = { latitude = it.replace("\n", "").replace("\r", "") },
-                            label = { Text("Latitude") },
-                            singleLine = true,
-                            maxLines = 1,
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Number,
-                                imeAction = ImeAction.Next
-                            ),
-                            modifier = Modifier.fillMaxWidth()
-                        )
-
-                        OutlinedTextField(
-                            value = longitude,
-                            onValueChange = { longitude = it.replace("\n", "").replace("\r", "") },
-                            label = { Text("Longitude") },
-                            singleLine = true,
-                            maxLines = 1,
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Number,
-                                imeAction = ImeAction.Done
-                            ),
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
+                // Bottom Action Buttons
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     OutlinedButton(
                         onClick = onBack,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(52.dp),
+                        shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = Color.Red
-                        )
+                            contentColor = Color(0xFFDC2626)
+                        ),
+                        border = BorderStroke(1.5.dp, Color(0xFFFCA5A5))
                     ) {
-                        Text("Batal")
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("Batal", fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
                     }
 
                     Button(
@@ -475,12 +858,27 @@ fun FormScreen(
                             }
                         },
                         enabled = isFormValid,
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(52.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = greenColor,
                             disabledContainerColor = Color.LightGray
                         )
                     ) {
-                        Text(if (editId != null && editId != 0) "Simpan Perubahan" else "Simpan")
+                        Icon(
+                            imageVector = Icons.Default.Save,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = if (editId != null && editId != 0) "Simpan Edit" else "Simpan",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 15.sp
+                        )
                     }
                 }
             }
