@@ -1,6 +1,6 @@
 # 🍃 E-Brix Mobile Application & Backend System
 
-**E-Brix** adalah aplikasi Android berbasis Jetpack Compose yang dirancang untuk membantu pemindaian, ekstraksi nilai Brix (kadar gula/kemanisan) secara otomatis dari alat ukur (refraktometer) menggunakan **ML Kit Text Recognition (OCR)**, serta menyimpan data hasil pemindaian secara *real-time* ke database **PostgreSQL** melalui **REST API Backend**.
+**E-Brix** adalah aplikasi Android berbasis Jetpack Compose yang dirancang untuk membantu pemindaian, ekstraksi nilai Brix (kadar gula/kemanisan) secara otomatis dari alat ukur (refraktometer) menggunakan **ML Kit Text Recognition (OCR)**, pencatatan varietas tebu, serta menyimpan data hasil pemindaian secara *real-time* ke database **PostgreSQL** melalui **REST API Backend**.
 
 ---
 
@@ -23,9 +23,9 @@ Dokumentasi detail disusun secara terpisah dalam bentuk bab-bab Markdown pada fo
 [ Aplikasi Android E-Brix ] 
             │
             ▼  (HTTP / REST API - JSON via Retrofit)
-[ Backend Node.js / Express.js ]
+[ Backend Flask (Python) / Node.js ]
             │
-            ▼  (Driver pg - PostgreSQL Client)
+            ▼  (Driver Database - PostgreSQL Client)
 [ Database PostgreSQL ]
 ```
 
@@ -34,10 +34,11 @@ Dokumentasi detail disusun secara terpisah dalam bentuk bab-bab Markdown pada fo
 ## ✨ Fitur Utama
 
 - 📷 **Pengambilan Foto Refraktometer & OCR**: Mengambil foto angka Brix dan mengekstraksinya secara otomatis menggunakan **Google ML Kit Text Recognition**.
+- 🌾 **Pencatatan Varietas Tebu**: Mendukung pemilihan jenis/varietas tebu (Bululawang, PS 862, PS 881, PSJK 922, Kidang Kencana, VMC 76-16, dll) melalui dropdown Material 3.
 - 📍 **Pencatatan Metadata**: Menyimpan informasi lokasi (*Latitude* & *Longitude*), petak lahan, dan *Timestamp* secara otomatis.
-- 🔄 **Sinkronisasi Database**: Terhubung secara *real-time* dengan database PostgreSQL untuk membaca dan menyimpan data scan.
-- 📱 **Antarmuka Modern**: Dibangun menggunakan **Jetpack Compose** & **Material 3** yang reponsif.
-- 🔌 **Dukungan HP Fisik & Emulator**: Mendukung pengujian menggunakan HP fisik via USB port-forwarding (`adb reverse`) maupun Android Emulator.
+- 🔄 **Sinkronisasi Database & Cache Lokal**: Terhubung secara *real-time* dengan database backend dan dilengkapi caching lokal `SharedPreferences` agar data varietas tebu tersimpan aman.
+- 📱 **Antarmuka Responsif Material 3 (Material You)**: Dibangun menggunakan **Jetpack Compose** & `BoxWithConstraints` yang responsif di berbagai ukuran layar (Smartphone & Tablet, Portrait & Landscape).
+- 🔐 **Autentikasi Akun Google**: Login menggunakan Google Sign-In yang aman dengan perlindungan credential file `google-services.json` di `.gitignore`.
 
 ---
 
@@ -45,7 +46,7 @@ Dokumentasi detail disusun secara terpisah dalam bentuk bab-bab Markdown pada fo
 
 ### **Android Application (Client)**
 - **Bahasa**: Kotlin
-- **UI Framework**: Jetpack Compose (Material 3)
+- **UI Framework**: Jetpack Compose (Material 3) + Layout Responsif
 - **Arsitektur**: MVVM (Model-View-ViewModel) + StateFlow
 - **Networking**: Retrofit2 & Gson Converter
 - **Machine Learning**: Google ML Kit Text Recognition
@@ -53,10 +54,9 @@ Dokumentasi detail disusun secara terpisah dalam bentuk bab-bab Markdown pada fo
 - **Navigasi**: Navigation Compose
 
 ### **Backend & Database**
-- **Runtime**: Node.js
-- **Framework Backend**: Express.js
+- **Runtime**: Python (Flask) / Node.js (Express)
 - **Database**: PostgreSQL (v14+)
-- **Database Client**: `pg` (node-postgres)
-- **CORS Middleware**: `cors`
+- **Driver**: `psycopg2-binary` (Python) / `pg` (Node.js)
+- **CORS Middleware**: `flask-cors` / `cors`
 
 ---

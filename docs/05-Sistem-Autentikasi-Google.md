@@ -24,19 +24,17 @@ Menggunakan `rememberLauncherForActivityResult` dan `GoogleSignInOptions` untuk 
 
 ---
 
-## 🛡️ Penanganan Robustness (Fallback Mode)
+## 🛡️ Pengamanan Credential Git (`.gitignore`)
 
-Saat melakukan *development* aplikasi Android, kesalahan kode status Google API seperti `10` (*DEVELOPER_ERROR*) dapat terjadi jika fingerprint SHA-1 belum didaftarkan di Google Cloud Console.
-
-Untuk mengatasi hambatan tersebut, aplikasi E-Brix dilengkapi dengan **Mekanisme Fallback Cerdas**:
-- Jika SDK Google API memberikan respon galat (seperti kode 10), aplikasi secara otomatis membaca akun Gmail utama yang terpasang pada HP menggunakan `AccountManager`.
-- Pengguna tetap dapat Sign-In dengan nama dan email akun Gmail mereka secara mulus tanpa melihat pesan error.
+Untuk menjaga keamanan token dan kunci Google Service:
+- File `app/google-services.json` disetel pada `.gitignore` agar tidak ikut ter-push ke repository publik di GitHub.
+- File credential tersebut tetap ada secara lokal di komputer pengembang agar proses build aplikasi Android berjalan lancar.
 
 ---
 
 ## 🚪 Mekanisme Log Out
 
-Saat pengguna menekan ikon **Logout** pada TopBar Beranda:
+Saat pengguna menekan ikon **Logout** pada TopBar Beranda atau dialog profil:
 1. Method `authViewModel.signOut()` dipanggil.
 2. Seluruh data sesi pengguna pada `SharedPreferences` dibersihkan.
 3. Klien `GoogleSignInClient.signOut()` dipanggil.

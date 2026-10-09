@@ -8,6 +8,7 @@ Database yang digunakan bernama `postgres` (atau `ebrix_db`), dengan struktur ta
 CREATE TABLE IF NOT EXISTS scans (
     id SERIAL PRIMARY KEY,
     petak VARCHAR(100) NOT NULL,
+    jenis_tebu VARCHAR(100),
     image_base64 TEXT,
     brix VARCHAR(50) NOT NULL,
     lat VARCHAR(50),
@@ -19,6 +20,7 @@ CREATE TABLE IF NOT EXISTS scans (
 ### Penjelasan Kolom Tabel `scans`:
 - `id`: Primary Key otomatis yang bertambah secara berurutan (*SERIAL*).
 - `petak`: Nama atau kode petak lahan perkebunan.
+- `jenis_tebu`: Jenis / varietas tebu (misal: Bululawang, PS 862, KK, dll).
 - `image_base64`: String teks hasil konversi gambar refraktometer (format Base64).
 - `brix`: Hasil angka kadar kemanisan gula tebu.
 - `lat`: Koordinat Latitude lokasi pengambilan sampel.

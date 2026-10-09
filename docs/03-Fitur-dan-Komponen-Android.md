@@ -6,7 +6,7 @@ Aplikasi E-Brix dibangun menggunakan pola arsitektur **MVVM (Model-View-ViewMode
 
 - **Model (`data/` & `network/`)**: Berisi struktur data domain (`ScanData`), Data Transfer Object (`ScanDto`), serta interface API (`ApiService`).
 - **View (`ui/`)**: Berisi tampilan antarmuka yang dibuat menggunakan *Declarative UI Jetpack Compose* (`LoginScreen`, `HomeScreen`, `FormScreen`, `DetailScreen`).
-- **ViewModel (`viewmodel/`)**: Berisi logika bisnis dan manajemen *State* aplikasi (`ScanViewModel` untuk data scan & `AuthViewModel` untuk otentikasi login).
+- **ViewModel (`viewmodel/`)**: Berisi logika bisnis, cache lokal `SharedPreferences`, dan manajemen *State* aplikasi (`ScanViewModel` untuk data scan & `AuthViewModel` untuk otentikasi login).
 
 ---
 
@@ -15,19 +15,20 @@ Aplikasi E-Brix dibangun menggunakan pola arsitektur **MVVM (Model-View-ViewMode
 1. **`LoginScreen.kt`**:
    - Halaman pertama saat pengguna belum melakukan Sign-In.
    - Menampilkan logo tebu, deskripsi aplikasi, serta tombol **"Sign in with Google"**.
+   - Penanganan error login yang aman dan informatif tanpa fallback akun keras.
 
 2. **`HomeScreen.kt`**:
-   - Beranda utama yang menampilkan daftar riwayat pemindaian dari database PostgreSQL.
-   - Dilengkapi nama akun pengguna di TopBar, tombol **Refresh** data, dan tombol **Logout**.
-   - Menampilkan *loading indicator* saat mengambil data, serta penanganan saat data kosong.
+   - Beranda utama yang menampilkan daftar riwayat pemindaian, petak lahan, jenis tebu, dan nilai Brix.
+   - Dilengkapi profil akun pengguna, tombol **Refresh** data, serta tombol **Edit**, **Hapus**, dan **Logout**.
 
 3. **`FormScreen.kt`**:
-   - Form untuk menginput data pemindaian baru.
-   - Dilengkapi fitur kamera untuk memfoto skala refraktometer, deteksi angka Brix otomatis via OCR, serta input petak, latitude, dan longitude.
-   - Tombol **Simpan** akan aktif secara otomatis jika seluruh kolom data telah terisi dengan benar.
+   - Form responsif berbasis Material 3 (`BoxWithConstraints`) yang mendukung tampilan Smartphone & Tablet (Portrait & Landscape).
+   - Mengelompokkan input ke dalam kartu-kartu estetik: Informasi Lahan & Varietas, Foto Sampel & OCR, serta Hasil Pengukuran & GPS.
+   - Dilengkapi dropdown pilihan **Jenis Tebu (Varietas)** seperti Bululawang (BL), PS 862, PS 881, PSJK 922, Kidang Kencana (KK), VMC 76-16, M 442-51, dll.
+   - Fitur kamera untuk memfoto skala refraktometer dan otomatis membaca angka Brix via OCR.
 
 4. **`DetailScreen.kt`**:
-   - Menampilkan rincian lengkap dari data yang dipilih pengguna, termasuk foto refraktometer, nilai Brix, koordinat GPS, dan waktu scan.
+   - Menampilkan rincian lengkap dari data yang dipilih pengguna, termasuk foto refraktometer, jenis tebu, nilai Brix, koordinat GPS, dan waktu scan.
 
 ---
 
@@ -39,8 +40,16 @@ Saat foto refraktometer diambil, bitmap gambar diproses oleh `TextRecognition.ge
 
 ---
 
+## 💾 Manajemen Cache Lokal Jenis Tebu (`ScanViewModel`)
+
+Untuk memastikan bahwa data pilihan varietas tebu dari pengguna tidak hilang saat di-edit atau di-refresh, `ScanViewModel` dilengkapi dengan **Cache Persisten (`SharedPreferences`)**:
+- Setiap kali data ditambahkan atau diperbarui, pilihan jenis tebu disimpan ke cache lokal `ebrix_jenis_tebu_cache`.
+- Saat data diambil ulang dari server database, ViewModel menggabungkan data server dengan cache lokal agar nilai varietas tebu tetap aman dan konsisten.
+
+---
+
 ## 🌐 Koneksi Network (Retrofit2 & Failover Interceptor)
 
 Untuk komunikasi ke backend, file `network/ApiService.kt` dilengkapi dengan **Automatic Failover Interceptor**:
-- Secara *default*, aplikasi mencoba mengirim request ke port USB ADB Reverse (`http://127.0.0.1:3000/`).
-- Jika koneksi USB terputus (*No route to host*), OkHttp secara otomatis mengalihkan request ke IP Wi-Fi Laptop (`http://10.66.178.226:3000/`) tanpa memunculkan pesan error di HP pengguna.
+- Aplikasi mencoba mengirim request ke IP server utama (`http://10.20.112.60:5000/`).
+- Jika koneksi terputus, OkHttp secara otomatis mengalihkan request ke IP Android Emulator (`http://10.0.2.2:5000/`) atau Localhost tanpa mengganggu kenyamanan pengguna.
