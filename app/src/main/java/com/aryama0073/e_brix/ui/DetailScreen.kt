@@ -1,6 +1,5 @@
 package com.aryama0073.e_brix.ui
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -10,7 +9,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
 import com.aryama0073.e_brix.viewmodel.ScanViewModel
 
@@ -108,19 +106,7 @@ fun DetailScreen(
                 Spacer(modifier = Modifier.height(4.dp))
                 Text("Jenis Tebu: ${data.jenisTebu}", style = MaterialTheme.typography.titleMedium, color = greenColor)
 
-                Spacer(modifier = Modifier.height(12.dp))
-
-                data.bitmap?.let {
-                    Image(
-                        bitmap = it.asImageBitmap(),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(200.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 Text("Brix: ${data.brix}", style = MaterialTheme.typography.bodyLarge)
                 Spacer(modifier = Modifier.height(4.dp))
