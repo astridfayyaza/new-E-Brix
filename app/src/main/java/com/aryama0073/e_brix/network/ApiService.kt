@@ -30,9 +30,11 @@ interface ApiService {
     suspend fun deleteScan(@Path("id") id: Int): Response<Unit>
 
     companion object {
-        // IP Wi-Fi Laptop Anda saat ini: 10.20.112.162
-        const val BASE_URL = "http://10.20.112.162:5000/"
-        const val EMULATOR_IP = "10.0.2.2:5000"
+        // IP Wi-Fi Laptop PC saat ini: 10.20.114.201 (Port 5000)
+        const val WIFI_HOST = "10.20.114.201:5000"
+        const val BASE_URL = "http://$WIFI_HOST/"
+        const val EMULATOR_HOST = "10.0.2.2:5000"
+        const val LOCAL_HOST = "127.0.0.1:5000"
 
         fun create(baseUrl: String = BASE_URL): ApiService {
             val logging = HttpLoggingInterceptor().apply {
@@ -49,10 +51,10 @@ interface ApiService {
                     )
                 } catch (_: IOException) {
                     val originalUrl = request.url.toString()
-                    val fallbackUrl = if (originalUrl.contains("10.20.112.162:5000")) {
-                        originalUrl.replace("10.20.112.162:5000", EMULATOR_IP)
-                    } else if (originalUrl.contains("10.0.2.2:5000")) {
-                        originalUrl.replace("10.0.2.2:5000", "127.0.0.1:5000")
+                    val fallbackUrl = if (originalUrl.contains(WIFI_HOST)) {
+                        originalUrl.replace(WIFI_HOST, EMULATOR_HOST)
+                    } else if (originalUrl.contains(EMULATOR_HOST)) {
+                        originalUrl.replace(EMULATOR_HOST, LOCAL_HOST)
                     } else {
                         originalUrl
                     }

@@ -155,6 +155,28 @@ fun LoginScreen(
                     )
                 }
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            TextButton(
+                onClick = {
+                    authViewModel.onSignInSuccess(
+                        email = "petani@ebrix.com",
+                        displayName = "Petani E-Brix",
+                        photoUrl = null
+                    )
+                    Toast.makeText(context, "Masuk sebagai Petani E-Brix", Toast.LENGTH_SHORT).show()
+                    onLoginSuccess()
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Masuk Langsung (Mode Pengujian / Tamu)",
+                    fontSize = 14.sp,
+                    color = greenColor,
+                    fontWeight = FontWeight.Medium
+                )
+            }
         }
     }
 }
