@@ -1,51 +1,53 @@
-# 📐 Bab 2: Arsitektur & Alur Kerja Sistem E-Brix
+# 📐 Bab 2: Arsitektur MVVM & Alur Data Aplikasi Android
 
-## 🏗️ Gambaran Umum Arsitektur
+## 🏗️ Pola Arsitektur MVVM (Model-View-ViewModel)
 
-Agar aplikasi E-Brix aman, stabil, dan dapat diakses oleh banyak pengguna tanpa membocorkan credential database, kita menggunakan arsitektur 3-Tier (Client - Backend API - Database):
+Aplikasi Android E-Brix dibangun menggunakan pola arsitektur **MVVM (Model-View-ViewModel)** yang direkomendasikan oleh Google untuk memastikan kode rapi, mudah dipelihara, dan memiliki pemisahan tugas (*separation of concerns*) yang jelas:
 
 ```text
-  [ Client (HP Android) ]
-             │
-             │  (Request HTTP / JSON via Retrofit2)
-             ▼
-  [ REST API (Node.js & Express) ]
-             │
-             │  (Query SQL via Driver pg)
-             ▼
-  [ Database (PostgreSQL) ]
+  [ View Layer (Jetpack Compose UI) ]
+                │
+                │  (Observasi State & Trigger Event)
+                ▼
+  [ ViewModel Layer (ScanViewModel & AuthViewModel) ]
+                │
+                ├──► [ Local Cache (SharedPreferences) ]
+                │
+                ▼  (Request HTTP / JSON via Retrofit2)
+  [ Network Layer (ApiService & ScanDto) ]
 ```
 
 ---
 
-## 🔄 Mengapa Menggunakan REST API alih-alih Koneksi Langsung ke Database?
+## 🔀 Komponen Arsitektur Android
 
-Saat mengembangkan aplikasi mobile, menghubungkan HP Android langsung ke database PostgreSQL (menggunakan driver JDBC) sangat **tidak disarankan** karena beberapa alasan penting:
-1. **Keamanan (Security)**: Password database tidak boleh disimpan di dalam file APK aplikasi karena mudah didekompilasi oleh peretas.
-2. **Koneksi Jaringan**: Port default PostgreSQL (`5432`) berbahaya jika dibuka langsung ke internet publik.
-3. **Kestabilan Mobile**: Sinyal HP sering kali tidak stabil. REST API menggunakan protokol HTTP yang jauh lebih tahan terhadap pemutusan koneksi singkat dibanding koneksi socket database mentah.
+1. **View Layer (`ui/`)**:
+   - Berisi komponen antarmuka *Declarative UI Jetpack Compose* (`HomeScreen`, `FormScreen`, `DetailScreen`, `LoginScreen`).
+   - Bertugas menampilkan data berdasarkan *State* dari ViewModel dan meneruskan aksi pengguna (seperti klik simpan/edit).
+
+2. **ViewModel Layer (`viewmodel/`)**:
+   - Menampung data sementara menggunakan `StateFlow`.
+   - Mengelola logika bisnis aplikasi, seperti pemrosesan tambah/edit/hapus data scan dan penyimpanan cache persisten ke `SharedPreferences`.
+
+3. **Data & Network Layer (`data/` & `network/`)**:
+   - `ScanData`: Model data domain internal Android.
+   - `ScanDto`: Data Transfer Object untuk pertukaran data JSON.
+   - `ApiService`: Interface HTTP Client berbasis Retrofit2 untuk komunikasi data luar.
 
 ---
 
-## 🔀 Alur Data Aplikasi (Data Flow)
+## 🔄 Alur Perjalanan Data (Data Flow) dalam Aplikasi
 
-Berikut adalah alur perjalanan data dari saat pengguna melakukan pemindaian hingga tersimpan di server:
+1. **Penginputan Data di UI**:
+   - Pengguna mengisi data petak lahan, varietas tebu, nilai Brix, dan lokasi pada `FormScreen`.
 
-1. **Pengambilan Gambar & OCR**:
-   - Pengguna membuka halaman form tambah scan dan memfoto refraktometer.
-   - Gambar diproses oleh `ML Kit Text Recognition` untuk mendapatkan nilai angka Brix secara otomatis.
+2. **Pengolahan di ViewModel**:
+   - `FormScreen` memanggil fungsi `viewModel.addData()` atau `viewModel.updateData()`.
+   - `ScanViewModel` menyimpan nilai varietas tebu ke cache lokal `SharedPreferences` agar data aman secara persisten.
 
-2. **Pengumpulan Metadata**:
-   - Sistem mengambil nama petak lahan, koordinat GPS (Latitude/Longitude), serta waktu saat scan dilakukan (*timestamp*).
-   - Gambar diubah (*compress & encode*) menjadi format string **Base64** agar mudah dikirimkan melalui JSON.
+3. **Pengiriman via REST API Client**:
+   - `ScanViewModel` mengonversi `ScanData` menjadi `ScanDto` lalu memanggil `ApiService` via Retrofit2 (`POST` atau `PUT`).
 
-3. **Pengiriman Data via API**:
-   - ViewModel memanggil fungsi `ApiService.createScan()` menggunakan Retrofit.
-   - Request HTTP `POST /api/scans` dikirimkan ke server backend Node.js.
-
-4. **Penyimpanan di Database**:
-   - Server Node.js menerima payload JSON, memvalidasi isinya, lalu menjalankan perintah `INSERT INTO scans ...` ke database PostgreSQL.
-   - Database mengembalikan data hasil simpan dengan ID unik baru ke server, dan server meneruskannya kembali ke aplikasi Android.
-
-5. **Pembaruan Tampilan UI**:
-   - Aplikasi menerima respon sukses dari server dan merefresh daftar data pada halaman Beranda (*HomeScreen*).
+4. **Pembaruan State UI**:
+   - Setelah mendapatkan respon sukses, `ScanViewModel` memperbarui `_dataList` (`StateFlow`).
+   - `HomeScreen` dan `DetailScreen` secara otomatis merefresh tampilan UI sesuai data terbaru.

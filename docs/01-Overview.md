@@ -1,31 +1,29 @@
-# 🍃 Dokumentasi Project E-Brix - Bab 1: Pengenalan & Latar Belakang
+# 🍃 Dokumentasi Android E-Brix - Bab 1: Pengenalan & Latar Belakang
 
-## 📌 Apa itu E-Brix?
+## 📌 Apa itu Aplikasi Android E-Brix?
 
-**E-Brix** adalah aplikasi Android berbasis *Jetpack Compose* yang dibuat untuk membantu petani dan petugas lapangan dalam mengukur serta memantau nilai **Brix** (kadar gula/kemanisan) dan **varietas tebu** hasil pertanian secara efisien.
+**E-Brix** adalah aplikasi mobile Android berbasis **Jetpack Compose** yang dikembangkan untuk memudahkan petugas dan tim lapangan dalam menginput, mengelola, serta memantau nilai **Brix** (kadar gula/kemanisan) dan **varietas tebu** dari berbagai petak lahan perkebunan.
 
-Di lapangan, pengukuran kadar Brix dilakukan menggunakan alat *refraktometer*. Namun, pencatatan hasil ukur dan varietas tebu secara manual sering kali memakan waktu dan berisiko terjadi kesalahan input (*human error*). 
-
-Dengan adanya aplikasi E-Brix, proses pencatatan menjadi otomatis:
-1. Petugas memfoto skala pada refraktometer.
-2. Aplikasi mengekstrak nilai angka Brix secara otomatis menggunakan teknologi **OCR (Optical Character Recognition)** dari Google ML Kit.
-3. Petugas memilih jenis/varietas tebu melalui dropdown Material 3 (Bululawang, PS 862, KK, dll).
-4. Data hasil scan (termasuk varietas tebu, koordinat lokasi GPS, petak lahan, dan waktu) langsung tersimpan secara *real-time* ke database server **PostgreSQL**.
+Aplikasi ini menggantikan proses pencatatan manual di lapangan menjadi serba digital dan terstruktur:
+1. Petugas menginput informasi petak/blok lahan tebu.
+2. Petugas memilih jenis/varietas tebu (Bululawang, PS 862, KK, VMC, dll) melalui dropdown Material 3.
+3. Petugas menginput nilai kadar Brix (%) serta koordinat lokasi GPS (*Latitude* & *Longitude*).
+4. Aplikasi menyimpan data ke cache persisten lokal dan mengunggahnya ke server melalui koneksi REST API secara *real-time*.
 
 ---
 
-## 🎯 Tujuan Pembuatan Project
+## 🎯 Tujuan Pengembangan Aplikasi
 
-- **Meningkatkan Efisiensi Lapangan**: Mempercepat proses pengumpulan data kadar Brix dan varietas tebu dari lokasi perkebunan.
-- **Akurasi Data**: Meminimalisir kesalahan penulisan angka hasil ukur refraktometer.
-- **Identifikasi Varietas Tebu**: Memudahkan pemetaan kualitas kadar Brix berdasarkan varietas tebu yang ditanam.
-- **Penyimpanan Terpusat & Cache Lokal**: Seluruh hasil scan dari berbagai petak lahan tersimpan rapi di database dan didukung cache lokal persisten.
-- **Monitoring Real-time & Tampilan Responsif**: Memudahkan tim manajemen memantau kualitas tebu di berbagai perangkat (Smartphone & Tablet).
+- **Digitalisasi Input Data Lapangan**: Mempercepat proses pencatatan kadar Brix dan varietas tebu secara rapi dan sistematis.
+- **Akurasi & Aksesibilitas Data**: Meminimalisir kesalahan input manual serta memudahkan peninjauan ulang data pemindaian tebu dari HP.
+- **Tampilan Modern & Responsif**: Menggunakan standar Material 3 (*Material You*) dengan layout adaptif untuk perangkat Smartphone maupun Tablet.
+- **Keandalan Akses Data**: Dilengkapi cache persisten lokal (`SharedPreferences`) sehingga data pilihan pengguna tetap aman dan tidak hilang.
 
 ---
 
-## 💻 Lingkup Kerja Project
+## 💻 Lingkup Pengembangan Android
 
-Sistem E-Brix terdiri dari dua bagian utama:
-1. **Aplikasi Mobile (Android)**: Frontend mobile tempat pengguna melakukan login dengan akun Google, mengambil foto scan refraktometer, memilih varietas tebu, dan melihat riwayat data scan.
-2. **Backend REST API & Database**: Server Python (Flask) / Node.js yang bertindak sebagai penghubung aman antara HP pengguna dengan database PostgreSQL.
+Pengembangan project ini berfokus pada **Aplikasi Mobile Android (Client)**:
+- **Tampilan Antarmuka (UI)**: Halaman Login Google, Beranda Daftar Scan, Form Input/Edit Data Responsif, serta Halaman Detail Data.
+- **Manajemen State & Logika**: Penggunaan ViewModel dan StateFlow untuk menangani alur data aplikasi.
+- **Konektivitas Network**: Pengiriman dan pengambilan data menggunakan Retrofit2 REST API Client.

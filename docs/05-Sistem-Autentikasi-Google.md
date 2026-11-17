@@ -2,39 +2,39 @@
 
 ## 🔑 Kebijakan Keamanan Akses Pengguna
 
-Untuk memastikan bahwa aplikasi E-Brix hanya digunakan oleh petugas yang berhak, kita mengintegrasikan **Google Sign-In**. 
+Untuk memastikan bahwa aplikasi E-Brix hanya dapat diakses oleh petugas yang memiliki otorisasi, aplikasi diintegrasikan dengan **Google Sign-In**.
 
 Aturan alur masuk pengguna:
-1. Saat aplikasi dibuka, sistem secara otomatis mengecek apakah pengguna sudah pernah Sign-In.
-2. Jika pengguna **sudah pernah Sign-In**, aplikasi akan **langsung masuk ke Beranda (`HomeScreen`)**.
-3. Jika pengguna **belum Sign-In atau telah Logout**, aplikasi akan mewajibkan pengguna untuk Sign-In terlebih dahulu di `LoginScreen`.
+1. Saat aplikasi dibuka, sistem secara otomatis mengecek status login pengguna di `SharedPreferences`.
+2. Jika pengguna **sudah login**, aplikasi akan **langsung masuk ke Beranda (`HomeScreen`)**.
+3. Jika pengguna **belum login atau telah Logout**, aplikasi akan mengarahkan pengguna ke `LoginScreen`.
 
 ---
 
-## 🛠️ Komponen Penyusun Autentikasi
+## 🛠️ Komponen Autentikasi Android
 
 ### 1. `AuthViewModel.kt`
-Mengelola *state* otentikasi menggunakan `StateFlow<UserData?>`. Sesi pengguna disimpan ke dalam penyimpanan lokal **`SharedPreferences`** (`ebrix_user_session`) dengan kunci:
-- `user_email`: Email akun Gmail pengguna.
+Mengelola *state* otentikasi menggunakan `StateFlow<UserData?>`. Sesi pengguna disimpan secara persisten di penyimpanan lokal **`SharedPreferences`** (`ebrix_user_session`) dengan kunci:
+- `user_email`: Email akun Google pengguna.
 - `user_name`: Nama tampilan pengguna.
-- `user_photo`: URL foto profil Google (jika ada).
+- `user_photo`: URL foto profil Google pengguna.
 
 ### 2. `LoginScreen.kt`
-Menggunakan `rememberLauncherForActivityResult` dan `GoogleSignInOptions` untuk memanggil pop-up pemilih akun Gmail bawaan sistem Android.
+Menggunakan `rememberLauncherForActivityResult` dan `GoogleSignInOptions` untuk memanggil dialog pemilih akun Google bawaan sistem Android.
 
 ---
 
 ## 🛡️ Pengamanan Credential Git (`.gitignore`)
 
-Untuk menjaga keamanan token dan kunci Google Service:
-- File `app/google-services.json` disetel pada `.gitignore` agar tidak ikut ter-push ke repository publik di GitHub.
-- File credential tersebut tetap ada secara lokal di komputer pengembang agar proses build aplikasi Android berjalan lancar.
+Untuk menjaga keamanan token dan konfigurasi Google Service:
+- File `app/google-services.json` dimasukkan ke dalam `.gitignore` agar file sensitif ini tidak ter-push ke repository publik GitHub.
+- File tersebut tetap ada di komputer pengembang secara lokal untuk kebutuhan build aplikasi Android.
 
 ---
 
 ## 🚪 Mekanisme Log Out
 
-Saat pengguna menekan ikon **Logout** pada TopBar Beranda atau dialog profil:
+Saat pengguna menekan tombol **Logout** pada dialog profil:
 1. Method `authViewModel.signOut()` dipanggil.
 2. Seluruh data sesi pengguna pada `SharedPreferences` dibersihkan.
 3. Klien `GoogleSignInClient.signOut()` dipanggil.

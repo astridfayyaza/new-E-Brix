@@ -1,62 +1,71 @@
-# 🍃 E-Brix Mobile Application & Backend System
+# 🍃 E-Brix Android Application
 
-**E-Brix** adalah aplikasi Android berbasis Jetpack Compose yang dirancang untuk membantu pemindaian, ekstraksi nilai Brix (kadar gula/kemanisan) secara otomatis dari alat ukur (refraktometer) menggunakan **ML Kit Text Recognition (OCR)**, pencatatan varietas tebu, serta menyimpan data hasil pemindaian secara *real-time* ke database **PostgreSQL** melalui **REST API Backend**.
+**E-Brix** adalah aplikasi Android berbasis **Jetpack Compose (Material 3)** yang dikembangkan untuk memudahkan pencatatan, pemantauan kadar kemanisan gula tebu (**Brix**), serta pengelolaan varietas tebu secara *real-time* dan terstruktur.
+
+Aplikasi ini dibangun menggunakan arsitektur **MVVM (Model-View-ViewModel)** yang bersih, responsif untuk berbagai ukuran layar (Smartphone & Tablet), didukung otentikasi **Google Sign-In**, serta dilengkapi sistem **caching persisten lokal** (`SharedPreferences`) dan integrasi **REST API Client** (`Retrofit2`).
 
 ---
 
-## 📚 Folder Dokumentasi Lengkap (`docs/`)
+## 📚 Folder Dokumentasi Android (`docs/`)
 
-Dokumentasi detail disusun secara terpisah dalam bentuk bab-bab Markdown pada folder `docs/`:
-1. [Bab 1: Pengenalan & Latar Belakang](docs/01-Overview.md)
-2. [Bab 2: Arsitektur & Alur Kerja Sistem](docs/02-Arsitektur-dan-Alur-Sistem.md)
-3. [Bab 3: Fitur & Komponen Aplikasi Android](docs/03-Fitur-dan-Komponen-Android.md)
-4. [Bab 4: Database PostgreSQL & Backend REST API](docs/04-Database-dan-Backend-API.md)
+Dokumentasi detail mengenai pengembangan aplikasi Android ini disusun secara terpisah dalam folder `docs/`:
+1. [Bab 1: Pengenalan & Latar Belakang Aplikasi](docs/01-Overview.md)
+2. [Bab 2: Arsitektur MVVM & Alur Data Android](docs/02-Arsitektur-dan-Alur-Sistem.md)
+3. [Bab 3: Fitur & Komponen UI Android (Material 3)](docs/03-Fitur-dan-Komponen-Android.md)
+4. [Bab 4: Model Data Domain & Integrasi REST API Client](docs/04-Database-dan-Backend-API.md)
 5. [Bab 5: Sistem Autentikasi Google & Manajemen Sesi](docs/05-Sistem-Autentikasi-Google.md)
-6. [Bab 6: Panduan Instalasi & Pengujian System](docs/06-Panduan-Instalasi-dan-Pengujian.md)
-7. [Bab 7: Catatan Pengembangan & Rencana Fitur Selanjutnya](docs/07-Catatan-Pengembangan-Selanjutnya.md)
+6. [Bab 6: Panduan Build & Pengujian Aplikasi](docs/06-Panduan-Instalasi-dan-Pengujian.md)
+7. [Bab 7: Log Pengubahan & Catatan Pengembangan](docs/07-Catatan-Pengembangan-Selanjutnya.md)
 
 ---
 
-## 📐 Arsitektur Sistem
+## 📐 Arsitektur Aplikasi Android (MVVM)
 
 ```text
-[ Aplikasi Android E-Brix ] 
+[ View Layer (Jetpack Compose UI) ]
             │
-            ▼  (HTTP / REST API - JSON via Retrofit)
-[ Backend Flask (Python) / Node.js ]
+            ▼  (Observe State via StateFlow)
+[ ViewModel Layer (ScanViewModel & AuthViewModel) ]
             │
-            ▼  (Driver Database - PostgreSQL Client)
-[ Database PostgreSQL ]
+            ├──► [ Local Cache (SharedPreferences) ]
+            │
+            ▼  (HTTP / REST API Client via Retrofit2 & Gson)
+[ Network Layer (ApiService & ScanDto) ]
 ```
 
 ---
 
-## ✨ Fitur Utama
+## ✨ Fitur Utama Aplikasi
 
-- 📷 **Pengambilan Foto Refraktometer & OCR**: Mengambil foto angka Brix dan mengekstraksinya secara otomatis menggunakan **Google ML Kit Text Recognition**.
-- 🌾 **Pencatatan Varietas Tebu**: Mendukung pemilihan jenis/varietas tebu (Bululawang, PS 862, PS 881, PSJK 922, Kidang Kencana, VMC 76-16, dll) melalui dropdown Material 3.
-- 📍 **Pencatatan Metadata**: Menyimpan informasi lokasi (*Latitude* & *Longitude*), petak lahan, dan *Timestamp* secara otomatis.
-- 🔄 **Sinkronisasi Database & Cache Lokal**: Terhubung secara *real-time* dengan database backend dan dilengkapi caching lokal `SharedPreferences` agar data varietas tebu tersimpan aman.
-- 📱 **Antarmuka Responsif Material 3 (Material You)**: Dibangun menggunakan **Jetpack Compose** & `BoxWithConstraints` yang responsif di berbagai ukuran layar (Smartphone & Tablet, Portrait & Landscape).
-- 🔐 **Autentikasi Akun Google**: Login menggunakan Google Sign-In yang aman dengan perlindungan credential file `google-services.json` di `.gitignore`.
+- 🌾 **Pencatatan Varietas Tebu**: Pemilihan varietas tebu (Bululawang, PS 862, PS 881, PSJK 922, Kidang Kencana, VMC 76-16, M 442-51, dll) melalui dropdown Material 3 yang interaktif.
+- 📍 **Pencatatan Data & Lokasi GPS**: Menginput informasi petak lahan, nilai kadar Brix, koordinat lokasi (*Latitude* & *Longitude*), serta *Timestamp* pencatatan.
+- 📱 **Antarmuka Responsif Material 3 (Material You)**: Tampilan UI adaptif menggunakan `BoxWithConstraints` yang otomatis menyesuaikan tata letak untuk Smartphone & Tablet (Portrait & Landscape).
+- 💾 **Manajemen Cache Persisten Lokal**: Data pilihan varietas tebu tersimpan secara persisten di `SharedPreferences` perangkat agar perubahan data dari pengguna tidak hilang saat aplikasi di-refresh.
+- 🔄 **Sinkronisasi Data via REST API Client**: Terhubung secara *online* menggunakan Retrofit2 dengan dukungan *Failover Interceptor* jaringan.
+- 🔐 **Autentikasi Google Sign-In**: Login aman menggunakan akun Google dengan pengamanan file konfigurasi `google-services.json` pada `.gitignore`.
 
 ---
 
 ## 🛠️ Teknologi & Library Utama
 
-### **Android Application (Client)**
-- **Bahasa**: Kotlin
-- **UI Framework**: Jetpack Compose (Material 3) + Layout Responsif
+- **Bahasa Pemrograman**: Kotlin
+- **UI Framework**: Jetpack Compose (Material 3) + Dynamic Responsive Layout
 - **Arsitektur**: MVVM (Model-View-ViewModel) + StateFlow
 - **Networking**: Retrofit2 & Gson Converter
-- **Machine Learning**: Google ML Kit Text Recognition
-- **Kamera**: CameraX / MediaStore Camera Intent
 - **Navigasi**: Navigation Compose
-
-### **Backend & Database**
-- **Runtime**: Python (Flask) / Node.js (Express)
-- **Database**: PostgreSQL (v14+)
-- **Driver**: `psycopg2-binary` (Python) / `pg` (Node.js)
-- **CORS Middleware**: `flask-cors` / `cors`
+- **Autentikasi**: Google Play Services Auth (`play-services-auth`)
+- **Penyimpanan Lokal**: SharedPreferences (`ebrix_user_session` & `ebrix_jenis_tebu_cache`)
 
 ---
+
+## 📂 Struktur Project Android
+
+```text
+com.aryama0073.e_brix/
+├── data/              # Model data domain (ScanData, UserData)
+├── network/           # Data Transfer Object (ScanDto) & Interface Retrofit (ApiService)
+├── viewmodel/         # Logika bisnis & manajemen state (ScanViewModel, AuthViewModel)
+├── ui/                # Komponen UI Compose (HomeScreen, FormScreen, DetailScreen, LoginScreen)
+├── navigation/        # Pengatur alur navigasi halaman (AppNav)
+└── MainActivity.kt    # Activity utama aplikasi
+```
