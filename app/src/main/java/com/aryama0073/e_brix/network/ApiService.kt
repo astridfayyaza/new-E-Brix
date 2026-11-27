@@ -29,9 +29,12 @@ interface ApiService {
     @DELETE("api/scans/{id}")
     suspend fun deleteScan(@Path("id") id: Int): Response<Unit>
 
+    @POST("auth/login")
+    suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
+
     companion object {
-        // IP Wi-Fi Laptop PC saat ini: 10.20.114.201 (Port 5000)
-        const val WIFI_HOST = "10.20.114.201:5000"
+        // IP Wi-Fi Laptop PC saat ini: 10.64.54.65 (Port 5000)
+        const val WIFI_HOST = "10.64.54.65:5000"
         const val BASE_URL = "http://$WIFI_HOST/"
         const val EMULATOR_HOST = "10.0.2.2:5000"
         const val LOCAL_HOST = "127.0.0.1:5000"

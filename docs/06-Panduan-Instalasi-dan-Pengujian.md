@@ -33,10 +33,10 @@ Sebelum menjalankan project E-Brix, pastikan perangkat komputer/laptop Anda tela
    ```
 
 ### Langkah 3: Aktifkan Port Forwarding USB (Khusus HP Fisik USB)
-Buka PowerShell di komputer Anda, lalu jalankan perintah berikut agar port `3000` di HP diteruskan ke laptop Anda:
+Buka PowerShell di komputer Anda, lalu jalankan perintah berikut agar port `5000` di HP diteruskan ke laptop Anda:
 
 ```powershell
-& "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe" -d reverse tcp:3000 tcp:3000
+& "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe" -d reverse tcp:5000 tcp:5000
 ```
 
 ### Langkah 4: Jalankan Aplikasi di Android Studio

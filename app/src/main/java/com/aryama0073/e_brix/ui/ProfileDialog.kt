@@ -3,9 +3,11 @@ package com.aryama0073.e_brix.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -37,10 +39,10 @@ fun ProfileDialog(
                     onDismiss()
                     onLogout()
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDC2626))
             ) {
                 Icon(
-                    imageVector = Icons.Default.Logout,
+                    imageVector = Icons.AutoMirrored.Filled.Logout,
                     contentDescription = null,
                     modifier = Modifier.size(18.dp)
                 )
@@ -57,7 +59,7 @@ fun ProfileDialog(
             Text(
                 text = "Informasi Akun",
                 fontWeight = FontWeight.Bold,
-                fontSize = 20.sp
+                fontSize = 19.sp
             )
         },
         text = {
@@ -67,7 +69,6 @@ fun ProfileDialog(
                     .padding(vertical = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Foto Profil Lingkaran Besar
                 if (!user.photoUrl.isNullOrEmpty()) {
                     AsyncImage(
                         model = user.photoUrl,
@@ -94,23 +95,47 @@ fun ProfileDialog(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(14.dp))
 
-                // Nama User
                 Text(
                     text = user.displayName ?: "Pengguna E-Brix",
                     fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp
+                    fontSize = 17.sp
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                // Email Gmail User
                 Text(
                     text = user.email,
                     color = Color.Gray,
-                    fontSize = 14.sp
+                    fontSize = 13.sp
                 )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Surface(
+                    color = if (user.isPetugas) Color(0xFFE0E7FF) else Color(0xFFDCFCE7),
+                    shape = RoundedCornerShape(20.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Badge,
+                            contentDescription = null,
+                            tint = if (user.isPetugas) Color(0xFF4338CA) else Color(0xFF15803D),
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = user.roleLabel,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = if (user.isPetugas) Color(0xFF4338CA) else Color(0xFF15803D)
+                        )
+                    }
+                }
             }
         }
     )

@@ -1,6 +1,11 @@
 package com.aryama0073.e_brix.ui
 
 import android.content.res.Configuration
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
+import com.aryama0073.e_brix.location.LocationHelper
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -16,6 +21,7 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -68,6 +74,50 @@ fun FormScreen(
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
     var isInitialized by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    var isFetchingLocation by remember { mutableStateOf(false) }
+
+    val fetchGpsLocation: () -> Unit = {
+        isFetchingLocation = true
+        LocationHelper.getCurrentLocation(
+            context = context,
+            onLocationReceived = { lat, lon ->
+                latitude = String.format(Locale.US, "%.6f", lat)
+                longitude = String.format(Locale.US, "%.6f", lon)
+                isFetchingLocation = false
+                Toast.makeText(context, "Koordinat GPS berhasil diambil", Toast.LENGTH_SHORT).show()
+            },
+            onError = { errMsg ->
+                isFetchingLocation = false
+                Toast.makeText(context, errMsg, Toast.LENGTH_LONG).show()
+            }
+        )
+    }
+
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val granted = permissions[android.Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                permissions[android.Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        if (granted) {
+            fetchGpsLocation()
+        } else {
+            Toast.makeText(context, "Izin lokasi diperlukan untuk geotagging GPS otomatis", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    val onGpsButtonClick: () -> Unit = {
+        if (LocationHelper.hasLocationPermission(context)) {
+            fetchGpsLocation()
+        } else {
+            locationPermissionLauncher.launch(
+                arrayOf(
+                    android.Manifest.permission.ACCESS_FINE_LOCATION,
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }
+    }
 
     LaunchedEffect(editId) {
         if (!isInitialized && editId != null && editId != 0) {
@@ -82,6 +132,14 @@ fun FormScreen(
                 longitude = existingData.lon
                 timestamp = existingData.timestamp
                 isInitialized = true
+            }
+        } else if (!isInitialized && (editId == null || editId == 0)) {
+            if (latitude.isBlank() && longitude.isBlank() && LocationHelper.hasLocationPermission(context)) {
+                fetchGpsLocation()
+            }
+        }
+    }
+            }
             }
         }
     }
@@ -329,6 +387,35 @@ fun FormScreen(
                                         modifier = Modifier.weight(1f)
                                     )
                                 }
+                                OutlinedButton(
+                                    onClick = onGpsButtonClick,
+                                    enabled = !isFetchingLocation,
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = greenColor),
+                                    border = BorderStroke(1.dp, greenColor.copy(alpha = 0.5f)),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    if (isFetchingLocation) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.size(16.dp),
+                                            strokeWidth = 2.dp,
+                                            color = greenColor
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text("Mengambil Koordinat GPS...", fontSize = 13.sp)
+                                    } else {
+                                        Icon(
+                                            imageVector = Icons.Default.MyLocation,
+                                            contentDescription = "GPS",
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            text = if (latitude.isBlank()) "Ambil Koordinat GPS Otomatis" else "Perbarui Lokasi GPS Terkini",
+                                            fontSize = 13.sp
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
@@ -519,6 +606,35 @@ fun FormScreen(
                                     modifier = Modifier.weight(1f)
                                 )
                             }
+                                OutlinedButton(
+                                    onClick = onGpsButtonClick,
+                                    enabled = !isFetchingLocation,
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = greenColor),
+                                    border = BorderStroke(1.dp, greenColor.copy(alpha = 0.5f)),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    if (isFetchingLocation) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.size(16.dp),
+                                            strokeWidth = 2.dp,
+                                            color = greenColor
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text("Mengambil Koordinat GPS...", fontSize = 13.sp)
+                                    } else {
+                                        Icon(
+                                            imageVector = Icons.Default.MyLocation,
+                                            contentDescription = "GPS",
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            text = if (latitude.isBlank()) "Ambil Koordinat GPS Otomatis" else "Perbarui Lokasi GPS Terkini",
+                                            fontSize = 13.sp
+                                        )
+                                    }
+                                }
                         }
                     }
                 }
