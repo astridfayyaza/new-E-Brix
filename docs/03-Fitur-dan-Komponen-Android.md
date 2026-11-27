@@ -1,55 +1,39 @@
-# 📱 Bab 3: Fitur & Komponen Aplikasi Android E-Brix
+# 📱 Bab 3: Fitur & Komponen UI Aplikasi Android E-Brix
 
-## 🏛️ Pola Arsitektur Codebase (MVVM)
-
-Aplikasi E-Brix dibangun menggunakan pola arsitektur **MVVM (Model-View-ViewModel)** dengan *Jetpack Compose*:
-
-- **Model (`data/` & `network/`)**: Berisi struktur data domain (`ScanData`), Data Transfer Object (`ScanDto`), serta interface API (`ApiService`).
-- **View (`ui/`)**: Berisi tampilan antarmuka yang dibuat menggunakan *Declarative UI Jetpack Compose* (`LoginScreen`, `HomeScreen`, `FormScreen`, `DetailScreen`).
-- **ViewModel (`viewmodel/`)**: Berisi logika bisnis, cache lokal `SharedPreferences`, dan manajemen *State* aplikasi (`ScanViewModel` untuk data scan & `AuthViewModel` untuk otentikasi login).
-
----
-
-## 🎨 Modul UI & Halaman Utama
+## 🎨 Komponen Layar UI (Jetpack Compose Material 3)
 
 1. **`LoginScreen.kt`**:
    - Halaman pertama saat pengguna belum melakukan Sign-In.
-   - Menampilkan logo tebu, deskripsi aplikasi, serta tombol **"Sign in with Google"**.
-   - Penanganan error login yang aman dan informatif tanpa fallback akun keras.
+   - Menampilkan identitas aplikasi E-Brix dan tombol **"Sign in with Google"** untuk autentikasi pengguna.
 
 2. **`HomeScreen.kt`**:
-   - Beranda utama yang menampilkan daftar riwayat pemindaian, petak lahan, jenis tebu, dan nilai Brix.
-   - Dilengkapi profil akun pengguna, tombol **Refresh** data, serta tombol **Edit**, **Hapus**, dan **Logout**.
+   - Beranda utama yang menampilkan daftar riwayat pemindaian tebu dalam bentuk kartu (*Card List*).
+   - Menampilkan informasi petak lahan, varietas tebu, nilai Brix, serta waktu pencatatan.
+   - Dilengkapi tombol profil pengguna, tombol **Refresh**, tombol **Edit**, tombol **Hapus**, dan tombol aksi tambah data (**+**).
 
 3. **`FormScreen.kt`**:
-   - Form responsif berbasis Material 3 (`BoxWithConstraints`) yang mendukung tampilan Smartphone & Tablet (Portrait & Landscape).
-   - Mengelompokkan input ke dalam kartu-kartu estetik: Informasi Lahan & Varietas, Foto Sampel & OCR, serta Hasil Pengukuran & GPS.
-   - Dilengkapi dropdown pilihan **Jenis Tebu (Varietas)** seperti Bululawang (BL), PS 862, PS 881, PSJK 922, Kidang Kencana (KK), VMC 76-16, M 442-51, dll.
-   - Fitur kamera untuk memfoto skala refraktometer dan otomatis membaca angka Brix via OCR.
+   - Form input dan edit data berbasis Material 3 yang **responsif** menggunakan `BoxWithConstraints`.
+   - Menyesuaikan tata letak secara otomatis untuk Smartphone dan Tablet (Portrait & Landscape):
+     - **Tampilan Layar Lebar (Tablet/Landscape)**: Menggunakan susunan 2 kolom (*side-by-side*) dengan `Modifier.weight(1f)`.
+     - **Tampilan Smartphone (Portrait)**: Menggunakan susunan 1 kolom vertikal yang rapi.
+   - Dilengkapi komponen **Dropdown Varietas Tebu** (`ExposedDropdownMenuBox`) dengan pilihan lengkap: Bululawang (BL), PS 862, PS 881, PSJK 922, Kidang Kencana (KK), VMC 76-16, M 442-51, dan Lainnya.
 
 4. **`DetailScreen.kt`**:
-   - Menampilkan rincian lengkap dari data yang dipilih pengguna, termasuk foto refraktometer, jenis tebu, nilai Brix, koordinat GPS, dan waktu scan.
+   - Menampilkan rincian lengkap dari data scan yang dipilih, meliputi nama petak lahan, varietas tebu, nilai Brix, koordinat GPS (*Latitude* & *Longitude*), dan *Timestamp*.
 
 ---
 
-## 👁️ Pemrosesan Gambar (OCR ML Kit)
+## 💾 Manajemen Cache Persisten Lokal (`ScanViewModel`)
 
-Fungsi ekstraksi teks pada file `ocr/OCRProcessor.kt` memanfaatkan pustaka `com.google.mlkit:text-recognition`. 
-
-Saat foto refraktometer diambil, bitmap gambar diproses oleh `TextRecognition.getClient(...)`. Teks angka yang terdeteksi kemudian difilter secara otomatis untuk mengisi kolom nilai Brix pada form secara presisi.
-
----
-
-## 💾 Manajemen Cache Lokal Jenis Tebu (`ScanViewModel`)
-
-Untuk memastikan bahwa data pilihan varietas tebu dari pengguna tidak hilang saat di-edit atau di-refresh, `ScanViewModel` dilengkapi dengan **Cache Persisten (`SharedPreferences`)**:
-- Setiap kali data ditambahkan atau diperbarui, pilihan jenis tebu disimpan ke cache lokal `ebrix_jenis_tebu_cache`.
-- Saat data diambil ulang dari server database, ViewModel menggabungkan data server dengan cache lokal agar nilai varietas tebu tetap aman dan konsisten.
+Untuk menjamin bahwa data pilihan varietas tebu pengguna tetap aman dan tidak hilang saat di-refresh:
+- `ScanViewModel` memanfaatkan penyimpanan lokal **`SharedPreferences`** (`ebrix_jenis_tebu_cache`).
+- Setiap kali pengguna menyimpan atau memperbarui data, varietas tebu disimpan secara persisten di penyimpanan HP.
+- Saat aplikasi membaca daftar data, ViewModel secara otomatis mengidentifikasi dan menggabungkan data cache lokal untuk ditampilkan di UI.
 
 ---
 
-## 🌐 Koneksi Network (Retrofit2 & Failover Interceptor)
+## 🌐 HTTP Network Client (Retrofit2 & Failover Interceptor)
 
-Untuk komunikasi ke backend, file `network/ApiService.kt` dilengkapi dengan **Automatic Failover Interceptor**:
-- Aplikasi mencoba mengirim request ke IP server utama (`http://10.20.112.60:5000/`).
-- Jika koneksi terputus, OkHttp secara otomatis mengalihkan request ke IP Android Emulator (`http://10.0.2.2:5000/`) atau Localhost tanpa mengganggu kenyamanan pengguna.
+Pengiriman data dari Android menggunakan pustaka **Retrofit2** yang dilengkapi **Failover Interceptor**:
+- Aplikasi mencoba mengirim request ke alamat server utama.
+- Jika koneksi terputus, `OkHttpClient` secara otomatis mengalihkan koneksi ke alamat fallback (misal Android Emulator `10.0.2.2:5000` / Localhost) tanpa mengganggu kenyamanan pengguna.

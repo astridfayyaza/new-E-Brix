@@ -1,6 +1,6 @@
 # 📝 Bab 7: Catatan Pengembangan & Rencana Fitur Selanjutnya
 
-Dokumen ini mencatat hal-hal yang perlu terus diperbarui seiring berjalannya pengembangan project E-Brix.
+Dokumen ini mencatat log pengubahan dan rencana pengembangan lanjutan untuk aplikasi Android E-Brix.
 
 ---
 
@@ -11,34 +11,34 @@ Dokumen ini mencatat hal-hal yang perlu terus diperbarui seiring berjalannya pen
 - [x] Refactoring UI **`FormScreen.kt`** menjadi responsif (Smartphone & Tablet) menggunakan `BoxWithConstraints` dan Material 3 Cards.
 - [x] Implementasi **Cache Persisten `SharedPreferences`** pada `ScanViewModel` untuk menyimpan jenis tebu secara permanen.
 - [x] Pengamanan file credential **`google-services.json`** pada `.gitignore` dan pelepasan pelacakan dari Git repository.
-- [x] Perbaikan handler Google Sign-In di `LoginScreen.kt` untuk penanganan error code yang lebih bersih.
+- [x] Perbaikan handler Google Sign-In di `LoginScreen.kt` untuk penanganan error code yang bersih.
+- [x] Penyederhanaan form input tanpa fitur foto/OCR untuk memfokuskan alur pada pencatatan varietas dan nilai Brix.
 
 ### **v1.0.0 (Versi Awal)**
 - [x] Integrasi UI Jetpack Compose (LoginScreen, HomeScreen, FormScreen, DetailScreen).
-- [x] Deteksi otomatis angka refraktometer menggunakan Google ML Kit Text Recognition (OCR).
-- [x] Koneksi REST API Retrofit2 ke server Python (Flask) / Node.js & Database PostgreSQL.
-- [x] Fitur Auto-Failover Interceptor (IP Server Utama & IP Emulator).
+- [x] Koneksi REST API Retrofit2 & Gson Converter.
+- [x] Fitur Auto-Failover Interceptor jaringan.
 - [x] Fitur Otentikasi Google Sign-In dengan penyimpanan sesi persisten di `SharedPreferences`.
 - [x] Pembuatan dokumentasi modular di folder `docs/`.
 
 ---
 
-## 💡 Rencana Fitur di Masa Mendatang (Future Work)
+## 💡 Rencana Pengembangan Fitur Selanjutnya (Future Work)
 
-Berikut adalah beberapa ide dan rencana pengembangan fitur lanjutan yang bisa ditambahkan ke dalam project E-Brix:
+Berikut adalah beberapa rencana pengembangan fitur lanjutan pada aplikasi Android E-Brix:
 
 1. **Peta Interaktif (GPS Mapping)**:
-   - Menampilkan sebaran lokasi petak lahan, varietas tebu, dan nilai kadar Brix dalam bentuk pin peta interaktif (menggunakan Google Maps SDK atau OpenStreetMap).
+   - Menampilkan lokasi petak lahan, varietas tebu, dan nilai kadar Brix dalam bentuk pin peta interaktif menggunakan Google Maps SDK.
 
 2. **Dukungan Mode Offline (Room Database)**:
-   - Menyimpan data scan ke database lokal HP (*Room*) terlebih dahulu jika lokasi perkebunan tidak memiliki sinyal seluler, lalu otomatis mensinkronkan data ke PostgreSQL saat kembali online.
+   - Menyimpan data scan ke database lokal HP (*Room*) saat tidak ada koneksi internet, lalu otomatis sinkronkan saat kembali online.
 
 3. **Ekspor Laporan (PDF / Excel)**:
-   - Menambahkan fitur ekspor rekapitulasi data kadar Brix berdasarkan tanggal, varietas tebu, atau petak lahan ke dalam file PDF/Excel.
+   - Menambahkan fitur ekspor rekapitulasi data kadar Brix dan varietas tebu ke dalam file PDF atau Excel.
 
 4. **Visualisasi Grafik Tren Kadar Brix**:
    - Menampilkan grafik peningkatan atau penurunan kadar Brix tebu antar minggu/bulan untuk mempermudah penentuan masa panen ideal.
 
 ---
 
-> 💡 **Tips untuk Pengembang**: Setiap kali menambahkan fitur baru pada project E-Brix, buatlah file markdown baru di dalam folder `docs/` atau perbarui log pada file ini!
+> 💡 **Tips Pengembang**: Setiap kali menambahkan fitur baru pada project Android E-Brix, perbarui log perubahan pada dokumen ini!

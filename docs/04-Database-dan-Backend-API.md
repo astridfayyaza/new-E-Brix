@@ -1,56 +1,61 @@
-# 🗄️ Bab 4: Database PostgreSQL & Backend Flask (Python)
+# 🌐 Bab 4: Model Data Domain & Integrasi REST API Client
 
-## 🐘 1. Skema Database PostgreSQL
+## 📦 1. Model Data Domain Android (`ScanData.kt`)
 
-Database yang digunakan bernama `postgres` (atau `ebrix_db`), dengan struktur tabel utama bernama `scans`:
+Model data domain internal yang digunakan oleh aplikasi Android E-Brix untuk merepresentasikan 1 entitas data pemindaian tebu:
 
-```sql
-CREATE TABLE IF NOT EXISTS scans (
-    id SERIAL PRIMARY KEY,
-    petak VARCHAR(100) NOT NULL,
-    jenis_tebu VARCHAR(100),
-    image_base64 TEXT,
-    brix VARCHAR(50) NOT NULL,
-    lat VARCHAR(50),
-    lon VARCHAR(50),
-    timestamp VARCHAR(100)
-);
+```kotlin
+data class ScanData(
+    val id: Int,
+    val petak: String,
+    val jenisTebu: String = "Bululawang (BL)",
+    val brix: String,
+    val lat: String,
+    val lon: String,
+    val timestamp: String,
+)
 ```
 
-### Penjelasan Kolom Tabel `scans`:
-- `id`: Primary Key otomatis yang bertambah secara berurutan (*SERIAL*).
-- `petak`: Nama atau kode petak lahan perkebunan.
-- `jenis_tebu`: Jenis / varietas tebu (misal: Bululawang, PS 862, KK, dll).
-- `image_base64`: String teks hasil konversi gambar refraktometer (format Base64).
-- `brix`: Hasil angka kadar kemanisan gula tebu.
-- `lat`: Koordinat Latitude lokasi pengambilan sampel.
-- `lon`: Koordinat Longitude lokasi pengambilan sampel.
-- `timestamp`: Tanggal dan waktu lengkap saat sampel diambil.
+### Penjelasan Variabel:
+- `id`: Angka identitas unik dari setiap data scan.
+- `petak`: Nama atau kode petak lahan perkebunan tebu.
+- `jenisTebu`: Varietas tebu pilihan pengguna (default: `"Bululawang (BL)"`).
+- `brix`: Angka kadar kemanisan gula tebu (%).
+- `lat`: Koordinat Latitude GPS lokasi pengambilan data.
+- `lon`: Koordinat Longitude GPS lokasi pengambilan data.
+- `timestamp`: Tanggal dan waktu lengkap saat data disimpan.
 
 ---
 
-## 🐍 2. Aplikasi Backend Flask (`app.py`)
+## 📄 2. Data Transfer Object (`ScanDto.kt`)
 
-Backend dibuat menggunakan bahasa **Python** dengan framework **Flask** dan driver database `psycopg2-binary`.
+`ScanDto` bertugas menjembatani format data dari REST API Client (format JSON) dengan model data internal Android (`ScanData`).
 
-### Dependensi Python:
-- `flask`: Framework web mikro untuk Python.
-- `flask-cors`: Middleware untuk mengizinkan akses koneksi lintas domain/network (CORS).
-- `psycopg2-binary`: Driver antarmuka PostgreSQL untuk Python.
-
-Perintah Instalasi Library:
-```bash
-pip install flask flask-cors psycopg2-binary
+```kotlin
+data class ScanDto(
+    @SerializedName("id") val id: Int? = null,
+    @SerializedName("petak") val petakRaw: String? = null,
+    @SerializedName("jenis_tebu") val jenisTebuRaw: String? = null,
+    @SerializedName("brix") val brixRaw: String? = null,
+    @SerializedName("latitude") val latitude: Double? = null,
+    @SerializedName("longitude") val longitude: Double? = null,
+    @SerializedName("timestamp") val timestampRaw: String? = null,
+)
 ```
+
+### Fungsi Konversi Data:
+- **`toDomain()`**: Mengonversi objek JSON `ScanDto` dari API menjadi objek internal `ScanData`.
+- **`toDto()`**: Mengonversi objek internal `ScanData` dari HP Android menjadi payload `ScanDto` untuk dikirimkan ke REST API.
 
 ---
 
-## 📑 3. Spesifikasi API Endpoint (Flask)
+## 🔌 3. Interface Retrofit HTTP Client (`ApiService.kt`)
 
-| Method | Endpoint | Fungsi | Payload Request | Respon Sukses |
-| :--- | :--- | :--- | :--- | :--- |
-| `GET` | `/` | Test status server Flask | *None* | `200 OK` ("Server Backend E-Brix (Flask) berjalan...") |
-| `GET` | `/api/scans` | Ambil semua data scan | *None* | `200 OK` (Array JSON berisi daftar objek scan) |
-| `POST` | `/api/scans` | Simpan data scan baru | Objek JSON `ScanDto` | `201 Created` (Objek JSON data yang baru disimpan) |
-| `PUT` | `/api/scans/<id>` | Memperbarui data scan berdasarkan ID | Objek JSON `ScanDto` | `200 OK` (Objek JSON data yang telah diperbarui) |
-| `DELETE` | `/api/scans/<id>` | Hapus data scan berdasarkan ID | *None* | `200 OK` (Pesan sukses hapus) |
+Aplikasi Android menggunakan interface Retrofit `ApiService` untuk mengeksekusi panggilan HTTP:
+
+| HTTP Method | Endpoint API | Fungsi di Android | Payload / Param |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/scans` | Mengambil seluruh daftar data scan | *None* |
+| `POST` | `/api/scans` | Mengirim data scan tebu baru | Payload `ScanDto` |
+| `PUT` | `/api/scans/{id}` | Mengubah data scan berdasarkan ID | Payload `ScanDto` |
+| `DELETE` | `/api/scans/{id}` | Menghapus data scan berdasarkan ID | Path `id` |
